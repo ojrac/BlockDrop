@@ -1,5 +1,7 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
+#include <time.h>
+#include <stdint.h>
 #include "Sim.h"
 
 namespace BlockDrop
@@ -22,7 +24,12 @@ public:
 public:
 	App()
 		: m_Sim(BOARD_TILE_WIDTH, BOARD_TILE_HEIGHT)
+		, m_BoardTopLeft{
+			(SCREEN_WIDTH_PX - BOARD_TILE_WIDTH_PX) / 2,
+			(SCREEN_HEIGHT_PX - BOARD_TILE_HEIGHT_PX) / 2,
+		}
 	{
+		srand(static_cast<uint32_t>(time(nullptr)));
 		sAppName = "BlockDrop";
 	}
 
@@ -31,6 +38,7 @@ public:
 		m_TileSprite = std::make_unique<olc::Sprite>("tile.png");
 		m_TileDecal = std::make_unique<olc::Decal>(m_TileSprite.get());
 
+		// Temp:
 		m_Sim.Set(0, 0, TileColor::Red);
 		m_Sim.Set(19, 9, TileColor::Cyan);
 
@@ -39,14 +47,18 @@ public:
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
+		m_Sim.Update(fElapsedTime);
+
 		Draw();
 
 		return true;
 	}
 
 private:
-	std::unique_ptr<olc::Sprite> m_TileSprite {};
-	std::unique_ptr<olc::Decal> m_TileDecal {};
+	std::unique_ptr<olc::Sprite> m_TileSprite{};
+	std::unique_ptr<olc::Decal> m_TileDecal{};
+
+	olc::vi2d m_BoardTopLeft{};
 
 	Sim m_Sim;
 
@@ -56,18 +68,17 @@ private:
 		Clear(olc::VERY_DARK_GREY);
 
 		DrawUI();
+
+		DrawTiles();
 	}
+
 	void DrawUI()
 	{
 		using namespace olc;
 
 		vi2d size{ BOARD_TILE_WIDTH_PX, BOARD_TILE_HEIGHT_PX };
-		vi2d topLeft{
-			(SCREEN_WIDTH_PX - BOARD_TILE_WIDTH_PX) / 2,
-			(SCREEN_HEIGHT_PX - BOARD_TILE_HEIGHT_PX) / 2,
-		};
-		vi2d topRight{ topLeft.x + BOARD_TILE_WIDTH_PX, topLeft.y };
-		vi2d bottomRight{ topLeft + size };
+		vi2d topRight{ m_BoardTopLeft.x + BOARD_TILE_WIDTH_PX, m_BoardTopLeft.y };
+		vi2d bottomRight{ m_BoardTopLeft + size };
 
 		// Border
 		{
@@ -75,14 +86,47 @@ private:
 			for (int i = 1; i <= borderPx; ++i)
 			{
 				vi2d borderOffset{ i, i };
-				DrawRect(topLeft - borderOffset, size + borderOffset + borderOffset, olc::GREY);
+				DrawRect(m_BoardTopLeft - borderOffset, size + borderOffset + borderOffset, olc::GREY);
 			}
 		}
 
 		// Board
-		FillRect(topLeft, size, olc::BLACK);
+		FillRect(m_BoardTopLeft, size, olc::BLACK);
+	}
 
-		// Tiles
+	static olc::Pixel GetColor(TileColor color)
+	{
+		switch (color)
+		{
+		case TileColor::Red:
+			return olc::RED;
+		case TileColor::Blue:
+			return olc::BLUE;
+		case TileColor::Cyan:
+			return olc::CYAN;
+		case TileColor::Magenta:
+			return olc::MAGENTA;
+		case TileColor::Yellow:
+			return olc::YELLOW;
+		case TileColor::Green:
+			return olc::GREEN;
+		default:
+			assert(0);
+			return olc::BLACK;
+		}
+	}
+
+	olc::vi2d BoardToScreen(int row, int column) const
+	{
+		return m_BoardTopLeft + olc::vi2d{ column * TILE_SIZE_PX, row * TILE_SIZE_PX };
+	}
+
+	void DrawTiles()
+	{
+		using namespace olc;
+
+		// Board tiles
+		using namespace olc;
 		for (int row = 0; row < BOARD_TILE_HEIGHT; ++row)
 		{
 			for (int col = 0; col < BOARD_TILE_WIDTH; ++col)
@@ -93,37 +137,33 @@ private:
 					continue;
 				}
 
-				Pixel color;
-				switch (tile)
-				{
-				case TileColor::Red:
-					color = olc::RED;
-					break;
-				case TileColor::Blue:
-					color = olc::BLUE;
-					break;
-				case TileColor::Cyan:
-					color = olc::CYAN;
-					break;
-				case TileColor::Magenta:
-					color = olc::MAGENTA;
-					break;
-				case TileColor::Yellow:
-					color = olc::YELLOW;
-					break;
-				case TileColor::Green:
-					color = olc::GREEN;
-					break;
-				default:
-					assert(0);
-					break;
-				}
-
-				DrawDecal(topLeft + vi2d{ col * TILE_SIZE_PX, row * TILE_SIZE_PX }, m_TileDecal.get(), { 1, 1 }, color);
+				DrawDecal(BoardToScreen(row, col), m_TileDecal.get(), {1, 1}, GetColor(tile));
 			}
-
 		}
 
+		// Falling block
+		auto optFallingBlock = m_Sim.GetFallingBlock();
+		if (optFallingBlock.has_value())
+		{
+			auto& tetronimo = optFallingBlock.value();
+			auto color = GetColor(tetronimo.GetTileColor());
+			auto position = tetronimo.GetPosition();
+			for (auto& offset : tetronimo.GetOffsets())
+			{
+				int row = position.y + offset.y;
+				int col = position.x + offset.x;
+				DrawTile(row, col, color);
+			}
+		}
+	}
+
+	void DrawTile(int row, int col, olc::Pixel const& color)
+	{
+		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
+		{
+			return;
+		}
+		DrawDecal(BoardToScreen(row, col), m_TileDecal.get(), { 1, 1 }, color);
 	}
 };
 
