@@ -62,6 +62,10 @@ public:
 	{
 		return m_Position;
 	}
+	void Move(olc::vi2d const& delta)
+	{
+		m_Position += delta;
+	}
 
 private:
 	Tetronimo* m_Tetronimo;
@@ -133,7 +137,6 @@ public:
 		: m_Width(width)
 		, m_Height(height)
 		, m_Tiles(width * height)
-		, m_FallingBlock()
 		, m_RandStream(std::random_device()())
 	{}
 	Sim() = delete;
@@ -159,8 +162,33 @@ public:
 
 	void Update(float deltaTime)
 	{
-		if (!m_FallingBlock.has_value())
+		m_DropTimer -= deltaTime;
+		if (m_DropTimer > 0)
 		{
+			return;
+		}
+
+		// Wait before the next step
+		m_DropTimer = 1;
+
+		if (m_FallingBlock.has_value())
+		{
+			TetronimoInstance copy = m_FallingBlock.value();
+			copy.Move(olc::vi2d{ 0, 1 });
+			if (HasCollision(copy))
+			{
+				// Place the current position blocks
+
+				m_FallingBlock.reset();
+			}
+			else
+			{
+				m_FallingBlock = copy;
+			}
+		}
+		else
+		{
+			// Spawn a new block
 			m_FallingBlock = std::make_optional<TetronimoInstance>(TetronimoFactory::New(0, 3, RandomColor()));
 		}
 	}
@@ -176,9 +204,29 @@ private:
 		return m_Tiles[row * m_Width + col];
 	}
 
+	bool HasCollision(TetronimoInstance const& tetronimo)
+	{
+		auto tetronimoPosition = tetronimo.GetPosition();
+		for (auto const& offset : tetronimo.GetOffsets())
+		{
+			auto pos = offset + tetronimoPosition;
+			if (pos.y >= m_Height)
+			{
+				return true;
+			}
+			if (_At(pos.y, pos.x) != TileColor::None)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 private:
 	int m_Width{};
 	int m_Height{};
+	float m_DropTimer{};
 	std::vector<TileColor> m_Tiles{};
 	std::optional<TetronimoInstance> m_FallingBlock{};
 
