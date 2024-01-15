@@ -11,6 +11,14 @@
 namespace BlockDrop
 {
 
+struct Input {
+	bool bLeft;
+	bool bRight;
+	bool bDrop;
+	bool bRotateLeft;
+	bool bRotateRight;
+};
+
 enum class TileColor
 {
 	None,
@@ -21,6 +29,7 @@ enum class TileColor
 	Magenta,
 	Yellow,
 	Green,
+	Orange,
 };
 
 class Tetronimo
@@ -87,12 +96,20 @@ public:
 
 private:
 	TetronimoFactory()
-		: m_Red(TileColor::Red, { {-1, 0}, {0, 0}, {1, 0}, {2, 0} })
-		, m_Blue(TileColor::Blue, { {-1, 0}, {0, 0}, {0, -1}, {1, -1} })
-		, m_Cyan(TileColor::Cyan, { {-1, -1}, {0, -1}, {0, 0}, {1, 0} })
-		, m_Magenta(TileColor::Magenta, { {-1, -1}, {-1, 0}, {0, 0}, {1, 0} })
-		, m_Yellow(TileColor::Yellow, { {-1, 0}, {0, 0}, {1, 0}, {1, -1} })
-		, m_Green(TileColor::Green, { {-1, 0}, {0, 0}, {0, -1}, {1, 0} })
+		// I
+		: m_Red(TileColor::Red, { {-2, 0}, {-1, 0}, {0, 0}, {1, 0} })
+		// S
+		, m_Blue(TileColor::Blue, { {-1, 1}, {0, 1}, {0, 0}, {1, 0} })
+		// Z
+		, m_Cyan(TileColor::Cyan, { {-1, 0}, {0, 0}, {0, 1}, {1, 1} })
+		// J
+		, m_Magenta(TileColor::Magenta, { {-1, 0}, {-1, 1}, {0, 1}, {1, 1} })
+		// L
+		, m_Yellow(TileColor::Yellow, { {-1, 1}, {0, 1}, {1, 1}, {1, 0} })
+		// T
+		, m_Green(TileColor::Green, { {-1, 0}, {0, 0}, {0, 1}, {1, 0} })
+		// O
+		, m_Orange(TileColor::Orange, { {-1, 0}, {0, 0}, {-1, 1}, {0, 1} })
 	{
 	}
 	TetronimoFactory(TetronimoFactory&) = delete;
@@ -116,6 +133,8 @@ private:
 			return &m_Yellow;
 		case TileColor::Green:
 			return &m_Green;
+		case TileColor::Orange:
+			return &m_Orange;
 		}
 
 		assert(0);
@@ -128,6 +147,7 @@ private:
 	Tetronimo m_Magenta;
 	Tetronimo m_Yellow;
 	Tetronimo m_Green;
+	Tetronimo m_Orange;
 };
 
 class Sim
@@ -160,73 +180,59 @@ public:
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
 
-	void Update(float deltaTime)
-	{
-		m_DropTimer -= deltaTime;
-		if (m_DropTimer > 0)
-		{
-			return;
-		}
-
-		// Wait before the next step
-		m_DropTimer = 1;
-
-		if (m_FallingBlock.has_value())
-		{
-			TetronimoInstance copy = m_FallingBlock.value();
-			copy.Move(olc::vi2d{ 0, 1 });
-			if (HasCollision(copy))
-			{
-				// Place the current position blocks
-
-				m_FallingBlock.reset();
-			}
-			else
-			{
-				m_FallingBlock = copy;
-			}
-		}
-		else
-		{
-			// Spawn a new block
-			m_FallingBlock = std::make_optional<TetronimoInstance>(TetronimoFactory::New(0, 3, RandomColor()));
-		}
-	}
+	void Update(float deltaTime, Input const& input);
 
 private:
 	TileColor RandomColor();
 
+	bool IsValidPosition(int row, int col) const
+	{
+		return row >= 0 && row < m_Height && col >= 0 && col < m_Width;
+	}
+
 	TileColor& _At(int row, int col)
 	{
-		assert(row >= 0 && row < m_Height);
-		assert(col >= 0 && col < m_Width);
+		assert(IsValidPosition(row, col));
 
 		return m_Tiles[row * m_Width + col];
 	}
 
-	bool HasCollision(TetronimoInstance const& tetronimo)
+	bool HandleInput(Input const& input);
+
+	bool HasCollision(TetronimoInstance const& tetronimo);
+
+	void GameOver()
+	{
+		m_Tiles.assign(m_Tiles.size(), TileColor::None);
+		m_FallingBlock.reset();
+	}
+
+	bool TryMoveFallingBlock(olc::vi2d const& delta);
+
+	void TransferBlockToTiles(TetronimoInstance const& tetronimo)
 	{
 		auto tetronimoPosition = tetronimo.GetPosition();
 		for (auto const& offset : tetronimo.GetOffsets())
 		{
 			auto pos = offset + tetronimoPosition;
-			if (pos.y >= m_Height)
+			int row = pos.y;
+			int col = pos.x;
+			if (!IsValidPosition(row, col))
 			{
-				return true;
+				continue;
 			}
-			if (_At(pos.y, pos.x) != TileColor::None)
+			if (_At(row, col) == TileColor::None)
 			{
-				return true;
+				_At(row, col) = tetronimo.GetTileColor();
 			}
 		}
-
-		return false;
 	}
 
 private:
 	int m_Width{};
 	int m_Height{};
 	float m_DropTimer{};
+	float m_InputTimer{};
 	std::vector<TileColor> m_Tiles{};
 	std::optional<TetronimoInstance> m_FallingBlock{};
 

@@ -38,16 +38,13 @@ public:
 		m_TileSprite = std::make_unique<olc::Sprite>("tile.png");
 		m_TileDecal = std::make_unique<olc::Decal>(m_TileSprite.get());
 
-		// Temp:
-		m_Sim.Set(0, 0, TileColor::Red);
-		m_Sim.Set(19, 9, TileColor::Cyan);
-
 		return true;
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
-		m_Sim.Update(fElapsedTime);
+		auto input = GetInput();
+		m_Sim.Update(fElapsedTime, input);
 
 		Draw();
 
@@ -110,6 +107,8 @@ private:
 			return olc::YELLOW;
 		case TileColor::Green:
 			return olc::GREEN;
+		case TileColor::Orange:
+			return olc::Pixel(0xec, 0x97, 0x06);
 		default:
 			assert(0);
 			return olc::BLACK;
@@ -164,6 +163,18 @@ private:
 			return;
 		}
 		DrawDecal(BoardToScreen(row, col), m_TileDecal.get(), { 1, 1 }, color);
+	}
+
+	Input GetInput()
+	{
+		Input result = {};
+		result.bLeft = GetKey(olc::Key::LEFT).bHeld;
+		result.bRight = GetKey(olc::Key::RIGHT).bHeld;
+		result.bRotateLeft = GetKey(olc::Key::Q).bPressed;
+		result.bRotateRight = GetKey(olc::Key::E).bPressed;
+		result.bDrop = GetKey(olc::Key::DOWN).bPressed;
+
+		return result;
 	}
 };
 
