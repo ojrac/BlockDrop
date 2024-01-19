@@ -10,7 +10,7 @@ void Sim::Update(float deltaTime, Input const& input)
 
 	if (HandleInput(input))
 	{
-		m_InputTimer = 0.125f;
+		m_InputTimer = s_InputRepeatDelaySec;
 	}
 
 	if (m_DropTimer > 0)
@@ -19,6 +19,7 @@ void Sim::Update(float deltaTime, Input const& input)
 	}
 
 	// Wait before the next step
+	// TODO: Scale with level
 	m_DropTimer = 0.7f;
 
 	if (m_FallingBlock.has_value())
@@ -47,6 +48,26 @@ void Sim::Update(float deltaTime, Input const& input)
 	}
 }
 
+bool Sim::TryRotateFallingBlock(int direction)
+{
+	if (!m_FallingBlock.has_value())
+	{
+		return false;
+	}
+
+	TetronimoInstance copy = m_FallingBlock.value();
+	copy.Rotate(direction);
+	if (HasCollision(copy))
+	{
+		return false;
+	}
+	else
+	{
+		m_FallingBlock = copy;
+		return true;
+	}
+}
+
 bool Sim::TryMoveFallingBlock(olc::vi2d const& delta)
 {
 	if (!m_FallingBlock.has_value())
@@ -69,6 +90,15 @@ bool Sim::TryMoveFallingBlock(olc::vi2d const& delta)
 
 bool Sim::HandleInput(Input const& input)
 {
+	if (input.bRotateLeft && TryRotateFallingBlock(-1))
+	{
+		m_DropTimer = std::max(s_RotateAirTimeSec, m_DropTimer);
+	}
+	if (input.bRotateRight && TryRotateFallingBlock(1))
+	{
+		m_DropTimer = std::max(s_RotateAirTimeSec, m_DropTimer);
+	}
+
 	if (m_InputTimer > 0 || !m_FallingBlock.has_value())
 	{
 		return false;
@@ -83,14 +113,23 @@ bool Sim::HandleInput(Input const& input)
 		return true;
 	}
 
-	// TODO: Rotate
-
 	// TODO: Drop
 
 	// TEMP
 	if (input.bDrop)
 	{
+		auto color = m_FallingBlock.value().GetTileColor();
 		m_FallingBlock.reset();
+
+		if (color == TileColor::Orange)
+		{
+			color = TileColor::Red;
+		}
+		else
+		{
+			color = static_cast<TileColor>(
+				static_cast<int>(color) + 1);
+		}
 	}
 
 	return false;

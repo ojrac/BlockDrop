@@ -35,9 +35,9 @@ enum class TileColor
 class Tetronimo
 {
 public:
-	Tetronimo(TileColor color, std::vector<olc::vi2d> tileOffsets)
+	Tetronimo(TileColor color, std::vector<std::vector<olc::vi2d>> tileOffsets)
 		: m_Color(color)
-		, m_TileOffsets(tileOffsets)
+		, m_RotatedTileOffsets(tileOffsets)
 	{
 	}
 
@@ -45,7 +45,7 @@ public:
 
 public: // Struct-ish, all public
 	TileColor m_Color;
-	std::vector<olc::vi2d> m_TileOffsets;
+	std::vector<std::vector<olc::vi2d>> m_RotatedTileOffsets;
 };
 
 class TetronimoInstance
@@ -60,8 +60,7 @@ public:
 
 	std::vector<olc::vi2d> const& GetOffsets() const
 	{
-		// TODO: Rotate by index
-		return m_Tetronimo->m_TileOffsets;
+		return m_Tetronimo->m_RotatedTileOffsets[m_RotationIndex];
 	}
 	TileColor GetTileColor() const
 	{
@@ -74,6 +73,11 @@ public:
 	void Move(olc::vi2d const& delta)
 	{
 		m_Position += delta;
+	}
+
+	void Rotate(int direction)
+	{
+		m_RotationIndex = (m_RotationIndex + direction) % m_Tetronimo->m_RotatedTileOffsets.size();
 	}
 
 private:
@@ -97,19 +101,49 @@ public:
 private:
 	TetronimoFactory()
 		// I
-		: m_Red(TileColor::Red, { {-2, 0}, {-1, 0}, {0, 0}, {1, 0} })
+		: m_Red(TileColor::Red, {
+			{ {-2, 0}, {-1, 0}, {0, 0}, {1, 0} },
+			{ {0, -1}, {0, 0}, {0, 1}, {0, 2} },
+			})
 		// S
-		, m_Blue(TileColor::Blue, { {-1, 1}, {0, 1}, {0, 0}, {1, 0} })
+		, m_Blue(TileColor::Blue, {
+			{ {-1, 1}, {0, 1}, {0, 0}, {1, 0} },
+			{ {0, 0}, {0, 1}, {1, 1}, {1, 2} },
+			{ {-1, 2}, {0, 2}, {0, 1}, {1, 1} },
+			{ {-1, 0}, {-1, 1}, {0, 1}, {0, 2} },
+			})
 		// Z
-		, m_Cyan(TileColor::Cyan, { {-1, 0}, {0, 0}, {0, 1}, {1, 1} })
+		, m_Cyan(TileColor::Cyan, {
+			{ {-1, 0}, {0, 0}, {0, 1}, {1, 1} },
+			{ {1, 0}, {1, 1}, {0, 1}, {0, 2} },
+			{ {-1, 1}, {0, 1}, {0, 2}, {1, 2} },
+			{ {0, 0}, {0, 1}, {-1, 1}, {-1, 2} },
+			})
 		// J
-		, m_Magenta(TileColor::Magenta, { {-1, 0}, {-1, 1}, {0, 1}, {1, 1} })
+		, m_Magenta(TileColor::Magenta, {
+			{ {-1, 0}, {-1, 1}, {0, 1}, {1, 1} },
+			{ {1, 0}, {0, 0}, {0, 1}, {0, 2} },
+			{ {-1, 1}, {0, 1}, {1, 1}, {1, 2} },
+			{ {0, 0}, {0, 1}, {0, 2}, {-1, 2} },
+			})
 		// L
-		, m_Yellow(TileColor::Yellow, { {-1, 1}, {0, 1}, {1, 1}, {1, 0} })
+		, m_Yellow(TileColor::Yellow, {
+			{ {-1, 1}, {0, 1}, {1, 1}, {1, 0} },
+			{ {0, 0}, {0, 1}, {0, 2}, {1, 2} },
+			{ {-1, 2}, {-1, 1}, {0, 1}, {1, 1} },
+			{ {-1, 0}, {0, 0}, {0, 1}, {0, 2} },
+			})
 		// T
-		, m_Green(TileColor::Green, { {-1, 0}, {0, 0}, {0, 1}, {1, 0} })
+		, m_Green(TileColor::Green, {
+			{ {-1, 1}, {0, 1}, {0, 0}, {1, 1} },
+			{ {0, 0}, {0, 1}, {0, 2}, {1, 1} },
+			{ {-1, 1}, {0, 1}, {1, 1}, {0, 2} },
+			{ {-1, 1}, {0, 0}, {0, 1}, {0, 2} },
+			})
 		// O
-		, m_Orange(TileColor::Orange, { {-1, 0}, {0, 0}, {-1, 1}, {0, 1} })
+		, m_Orange(TileColor::Orange, {
+			{ {-1, 0}, {0, 0}, {-1, 1}, {0, 1} },
+			})
 	{
 	}
 	TetronimoFactory(TetronimoFactory&) = delete;
@@ -152,6 +186,10 @@ private:
 
 class Sim
 {
+public:
+	static constexpr float s_RotateAirTimeSec = 0.1f;
+	static constexpr float s_InputRepeatDelaySec = 0.125f;
+
 public:
 	Sim(int width, int height)
 		: m_Width(width)
@@ -208,6 +246,7 @@ private:
 	}
 
 	bool TryMoveFallingBlock(olc::vi2d const& delta);
+	bool TryRotateFallingBlock(int direction);
 
 	void TransferBlockToTiles(TetronimoInstance const& tetronimo)
 	{
