@@ -48,6 +48,24 @@ void Sim::Update(float deltaTime, Input const& input)
 	}
 }
 
+olc::vi2d Sim::GetDropPosition() const
+{
+	if (!m_FallingBlock.has_value())
+	{
+		return {-1, -1};
+	}
+
+	TetronimoInstance copy = m_FallingBlock.value();
+	olc::vi2d lastGoodPosition = { -1, -1 };
+	while (!HasCollision(copy))
+	{
+		lastGoodPosition = copy.GetPosition();
+		copy.Move({ 0, 1 });
+	}
+
+	return lastGoodPosition;
+}
+
 bool Sim::TryRotateFallingBlock(int direction)
 {
 	if (!m_FallingBlock.has_value())
@@ -135,12 +153,12 @@ bool Sim::HandleInput(Input const& input)
 	return false;
 }
 
-bool Sim::HasCollision(TetronimoInstance const& tetronimo)
+bool Sim::HasCollision(TetronimoInstance const& tetronimo) const
 {
 	auto tetronimoPosition = tetronimo.GetPosition();
-	for (auto const& offset : tetronimo.GetOffsets())
+	for (auto const& square : tetronimo.GetSquares())
 	{
-		auto pos = offset + tetronimoPosition;
+		auto pos = square.AsVi2d() + tetronimoPosition;
 		int row = pos.y;
 		int col = pos.x;
 		// Ignore "collision" above the frame (row < 0)

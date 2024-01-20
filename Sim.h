@@ -32,10 +32,35 @@ enum class TileColor
 	Orange,
 };
 
+enum class BorderDirection : unsigned char
+{
+	None = 0,
+	Top = 1 << 0,
+	Left = 1 << 1,
+	Right = 1 << 2,
+	Bottom = 1 << 3,
+
+	TopBottom = Top | Bottom,
+	TopRightBottom = Top | Right | Bottom,
+	TopBottomLeft = Top | Bottom | Left,
+};
+
+struct TetronimoSquare
+{
+	int m_Column {};
+	int m_Row{};
+	BorderDirection m_Directions {};
+
+	olc::vi2d AsVi2d() const
+	{
+		return olc::vi2d(m_Column, m_Row);
+	}
+};
+
 class Tetronimo
 {
 public:
-	Tetronimo(TileColor color, std::vector<std::vector<olc::vi2d>> tileOffsets)
+	Tetronimo(TileColor color, std::vector<std::vector<TetronimoSquare>> tileOffsets)
 		: m_Color(color)
 		, m_RotatedTileOffsets(tileOffsets)
 	{
@@ -45,7 +70,7 @@ public:
 
 public: // Struct-ish, all public
 	TileColor m_Color;
-	std::vector<std::vector<olc::vi2d>> m_RotatedTileOffsets;
+	std::vector<std::vector<TetronimoSquare>> m_RotatedTileOffsets;
 };
 
 class TetronimoInstance
@@ -58,7 +83,7 @@ public:
 	{
 	}
 
-	std::vector<olc::vi2d> const& GetOffsets() const
+	std::vector<TetronimoSquare> const& GetSquares() const
 	{
 		return m_Tetronimo->m_RotatedTileOffsets[m_RotationIndex];
 	}
@@ -102,7 +127,7 @@ private:
 	TetronimoFactory()
 		// I
 		: m_Red(TileColor::Red, {
-			{ {-2, 0}, {-1, 0}, {0, 0}, {1, 0} },
+			{ {-2, 0, BorderDirection::TopBottomLeft}, {-1, 0, BorderDirection::TopBottom}, {0, 0, BorderDirection::TopBottom}, {1, 0, BorderDirection::TopRightBottom} },
 			{ {0, -1}, {0, 0}, {0, 1}, {0, 2} },
 			})
 		// S
@@ -218,6 +243,8 @@ public:
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
 
+	olc::vi2d GetDropPosition() const;
+
 	void Update(float deltaTime, Input const& input);
 
 private:
@@ -234,10 +261,16 @@ private:
 
 		return m_Tiles[row * m_Width + col];
 	}
+	TileColor const& _At(int row, int col) const
+	{
+		assert(IsValidPosition(row, col));
+
+		return m_Tiles[row * m_Width + col];
+	}
 
 	bool HandleInput(Input const& input);
 
-	bool HasCollision(TetronimoInstance const& tetronimo);
+	bool HasCollision(TetronimoInstance const& tetronimo) const;
 
 	void GameOver()
 	{
@@ -251,9 +284,9 @@ private:
 	void TransferBlockToTiles(TetronimoInstance const& tetronimo)
 	{
 		auto tetronimoPosition = tetronimo.GetPosition();
-		for (auto const& offset : tetronimo.GetOffsets())
+		for (auto const& square : tetronimo.GetSquares())
 		{
-			auto pos = offset + tetronimoPosition;
+			auto pos = square.AsVi2d() + tetronimoPosition;
 			int row = pos.y;
 			int col = pos.x;
 			if (!IsValidPosition(row, col))
