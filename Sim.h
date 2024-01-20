@@ -95,6 +95,10 @@ public:
 	{
 		return m_Position;
 	}
+	void SetPosition(olc::vi2d const& position)
+	{
+		m_Position = position;
+	}
 	void Move(olc::vi2d const& delta)
 	{
 		m_Position += delta;

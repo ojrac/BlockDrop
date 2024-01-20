@@ -131,23 +131,12 @@ bool Sim::HandleInput(Input const& input)
 		return true;
 	}
 
-	// TODO: Drop
-
-	// TEMP
-	if (input.bDrop)
+	if (input.bDrop && m_FallingBlock.has_value())
 	{
-		auto color = m_FallingBlock.value().GetTileColor();
-		m_FallingBlock.reset();
-
-		if (color == TileColor::Orange)
-		{
-			color = TileColor::Red;
-		}
-		else
-		{
-			color = static_cast<TileColor>(
-				static_cast<int>(color) + 1);
-		}
+		TetronimoInstance& tetronimo = m_FallingBlock.value();
+		olc::vi2d dropPosition = GetDropPosition();
+		tetronimo.SetPosition(dropPosition);
+		m_DropTimer = 0;
 	}
 
 	return false;
