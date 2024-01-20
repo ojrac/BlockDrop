@@ -1,6 +1,7 @@
 # TODO
 - Preview dropping blocks
-- Dropping blocks
+- Dropping blocks hotkey
+- Clearing rows
 - Score and Level UI
 - Next block UI
 - Score math and numbers
