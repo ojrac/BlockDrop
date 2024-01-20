@@ -43,6 +43,11 @@ public:
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
+		if (GetKey(olc::ESCAPE).bPressed)
+		{
+			return false;
+		}
+
 		auto input = GetInput();
 		m_Sim.Update(fElapsedTime, input);
 
