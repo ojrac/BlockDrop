@@ -165,7 +165,7 @@ private:
 			{
 				int row = position.y + square.m_Row;
 				int col = position.x + square.m_Column;
-				DrawTileOutline(row, col, color);
+				DrawTileOutline(row, col, square.m_Directions, color);
 			}
 		}
 	}
@@ -179,7 +179,7 @@ private:
 		DrawDecal(BoardToScreen(row, col), m_TileDecal.get(), { 1, 1 }, color);
 	}
 
-	void DrawTileOutline(int row, int col, olc::Pixel const& color)
+	void DrawTileOutline(int row, int col, BorderDirection directions, olc::Pixel const& color)
 	{
 		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
 		{
@@ -189,10 +189,22 @@ private:
 		olc::vi2d topLeft = BoardToScreen(row, col);
 		olc::vi2d bottomRight{ topLeft.x + TILE_SIZE_PX - 1, topLeft.y + TILE_SIZE_PX - 1 };
 
-		DrawLine(topLeft.x, topLeft.y, bottomRight.x, topLeft.y, color); // top
-		DrawLine(bottomRight.x, topLeft.y, bottomRight.x, bottomRight.y, color); // right
-		DrawLine(topLeft.x, bottomRight.y, bottomRight.x, bottomRight.y, color); // bottom
-		DrawLine(topLeft.x, topLeft.y, topLeft.x, bottomRight.y, color); // left
+		if (HasDirection(directions, BorderDirection::Top))
+		{
+			DrawLine(topLeft.x, topLeft.y, bottomRight.x, topLeft.y, color); // top
+		}
+		if (HasDirection(directions, BorderDirection::Right))
+		{
+			DrawLine(bottomRight.x, topLeft.y, bottomRight.x, bottomRight.y, color); // right
+		}
+		if (HasDirection(directions, BorderDirection::Bottom))
+		{
+			DrawLine(topLeft.x, bottomRight.y, bottomRight.x, bottomRight.y, color); // bottom
+		}
+		if (HasDirection(directions, BorderDirection::Left))
+		{
+			DrawLine(topLeft.x, topLeft.y, topLeft.x, bottomRight.y, color); // left
+		}
 	}
 
 	Input GetInput()

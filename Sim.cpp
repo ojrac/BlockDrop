@@ -3,6 +3,13 @@
 namespace BlockDrop
 {
 
+
+bool HasDirection(BorderDirection value, BorderDirection other)
+{
+	auto otherVal = static_cast<unsigned char>(other);
+	return (static_cast<unsigned char>(value) & otherVal) == otherVal;
+}
+
 void Sim::Update(float deltaTime, Input const& input)
 {
 	m_DropTimer -= deltaTime;

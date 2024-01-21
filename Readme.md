@@ -1,5 +1,4 @@
 # TODO
-- Clean up block preview drawing
 - Clearing rows
 - Score and Level UI
 - Next block UI

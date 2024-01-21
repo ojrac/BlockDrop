@@ -40,10 +40,25 @@ enum class BorderDirection : unsigned char
 	Right = 1 << 2,
 	Bottom = 1 << 3,
 
-	TopBottom = Top | Bottom,
-	TopRightBottom = Top | Right | Bottom,
-	TopBottomLeft = Top | Bottom | Left,
+	// Combo shortcuts, abbreviated
+	TR = Top | Right,
+	TRB = Top | Right | Bottom,
+	TRL = Top | Right | Left,
+	TB = Top | Bottom,
+	TBL = Top | Bottom | Left,
+	TL = Top | Left,
+
+	RB = Right | Bottom,
+	RBL = Right | Bottom | Left,
+	RL = Right | Left,
+
+	LR = Left | Right,
+	LBR = Left | Bottom | Right,
+
+	BL = Bottom | Left,
 };
+
+bool HasDirection(BorderDirection value, BorderDirection other);
 
 struct TetronimoSquare
 {
@@ -131,47 +146,47 @@ private:
 	TetronimoFactory()
 		// I
 		: m_Red(TileColor::Red, {
-			{ {-2, 0, BorderDirection::TopBottomLeft}, {-1, 0, BorderDirection::TopBottom}, {0, 0, BorderDirection::TopBottom}, {1, 0, BorderDirection::TopRightBottom} },
-			{ {0, -1}, {0, 0}, {0, 1}, {0, 2} },
+			{ {-2, 0, BorderDirection::TBL}, {-1, 0, BorderDirection::TB}, {0, 0, BorderDirection::TB}, {1, 0, BorderDirection::TRB} },
+			{ {0, -1, BorderDirection::TRL}, {0, 0, BorderDirection::LR}, {0, 1, BorderDirection::LR}, {0, 2, BorderDirection::LBR} },
 			})
 		// S
 		, m_Blue(TileColor::Blue, {
-			{ {-1, 1}, {0, 1}, {0, 0}, {1, 0} },
-			{ {0, 0}, {0, 1}, {1, 1}, {1, 2} },
-			{ {-1, 2}, {0, 2}, {0, 1}, {1, 1} },
-			{ {-1, 0}, {-1, 1}, {0, 1}, {0, 2} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::RB}, {0, 0, BorderDirection::TL}, {1, 0, BorderDirection::TRB} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::BL}, {1, 1, BorderDirection::TR}, {1, 2, BorderDirection::LBR} },
+			{ {-1, 2, BorderDirection::TBL}, {0, 2, BorderDirection::RB}, {0, 1, BorderDirection::TL}, {1, 1, BorderDirection::TRB} },
+			{ {-1, 0, BorderDirection::TRL}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::TR}, {0, 2, BorderDirection::RBL} },
 			})
 		// Z
 		, m_Cyan(TileColor::Cyan, {
-			{ {-1, 0}, {0, 0}, {0, 1}, {1, 1} },
-			{ {1, 0}, {1, 1}, {0, 1}, {0, 2} },
-			{ {-1, 1}, {0, 1}, {0, 2}, {1, 2} },
-			{ {0, 0}, {0, 1}, {-1, 1}, {-1, 2} },
+			{ {-1, 0, BorderDirection::TBL}, {0, 0, BorderDirection::TR}, {0, 1, BorderDirection::BL}, {1, 1, BorderDirection::TRB} },
+			{ {1, 0, BorderDirection::TRL}, {1, 1, BorderDirection::RB}, {0, 1, BorderDirection::TL}, {0, 2, BorderDirection::RBL} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TR}, {0, 2, BorderDirection::BL}, {1, 2, BorderDirection::TRB} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RB}, {-1, 1, BorderDirection::TL}, {-1, 2, BorderDirection::RBL} },
 			})
 		// J
 		, m_Magenta(TileColor::Magenta, {
-			{ {-1, 0}, {-1, 1}, {0, 1}, {1, 1} },
-			{ {1, 0}, {0, 0}, {0, 1}, {0, 2} },
-			{ {-1, 1}, {0, 1}, {1, 1}, {1, 2} },
-			{ {0, 0}, {0, 1}, {0, 2}, {-1, 2} },
+			{ {-1, 0, BorderDirection::TRL}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TRB} },
+			{ {1, 0, BorderDirection::TRB}, {0, 0, BorderDirection::TL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::RBL} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TR}, {1, 2, BorderDirection::RBL} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::RB}, {-1, 2, BorderDirection::TBL} },
 			})
 		// L
 		, m_Yellow(TileColor::Yellow, {
-			{ {-1, 1}, {0, 1}, {1, 1}, {1, 0} },
-			{ {0, 0}, {0, 1}, {0, 2}, {1, 2} },
-			{ {-1, 2}, {-1, 1}, {0, 1}, {1, 1} },
-			{ {-1, 0}, {0, 0}, {0, 1}, {0, 2} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::RB}, {1, 0, BorderDirection::TRL} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::BL}, {1, 2, BorderDirection::TRB} },
+			{ {-1, 2, BorderDirection::RBL}, {-1, 1, BorderDirection::TL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TRB} },
+			{ {-1, 0, BorderDirection::TBL}, {0, 0, BorderDirection::TR}, {0, 1, BorderDirection::LR}, {0, 2, BorderDirection::RBL} },
 			})
 		// T
 		, m_Green(TileColor::Green, {
-			{ {-1, 1}, {0, 1}, {0, 0}, {1, 1} },
-			{ {0, 0}, {0, 1}, {0, 2}, {1, 1} },
-			{ {-1, 1}, {0, 1}, {1, 1}, {0, 2} },
-			{ {-1, 1}, {0, 0}, {0, 1}, {0, 2} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::Bottom}, {0, 0, BorderDirection::TRL}, {1, 1, BorderDirection::TRB} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::Left}, {1, 1, BorderDirection::TRB}, {0, 2, BorderDirection::RBL} },
+			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::Top}, {0, 2, BorderDirection::RBL}, {1, 1, BorderDirection::TRB} },
+			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::Right}, {-1, 1, BorderDirection::TBL}, {0, 2, BorderDirection::RBL} },
 			})
 		// O
 		, m_Orange(TileColor::Orange, {
-			{ {-1, 0}, {0, 0}, {-1, 1}, {0, 1} },
+			{ {-1, 0, BorderDirection::TL}, {0, 0, BorderDirection::TR}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::RB} },
 			})
 	{
 	}
