@@ -32,6 +32,10 @@ void Sim::Update(float deltaTime, Input const& input)
 	// TODO: Scale with level
 	m_DropTimer = 0.7f;
 
+	if (!m_NextBlock.has_value())
+	{
+		m_NextBlock = TetronimoFactory::New(0, 0, RandomColor());
+	}
 	if (m_FallingBlock.has_value())
 	{
 		TetronimoInstance copy = m_FallingBlock.value();
@@ -45,15 +49,17 @@ void Sim::Update(float deltaTime, Input const& input)
 	else
 	{
 		// Spawn a new block
-		auto newBlock = TetronimoFactory::New(0, m_Width / 2, RandomColor());
-		if (HasCollision(newBlock))
+		TetronimoInstance newBlockCopy = m_NextBlock.value();
+		newBlockCopy.SetPosition({ m_Width / 2, 0 });
+		if (HasCollision(newBlockCopy))
 		{
-			TransferBlockToTiles(newBlock);
+			TransferBlockToTiles(newBlockCopy);
 			GameOver();
 		}
 		else
 		{
-			m_FallingBlock = std::make_optional<TetronimoInstance>(newBlock);
+			m_FallingBlock = std::make_optional<TetronimoInstance>(newBlockCopy);
+			m_NextBlock = TetronimoFactory::New(0, 0, RandomColor());
 		}
 	}
 }

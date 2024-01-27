@@ -264,6 +264,7 @@ public:
 	}
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
+	std::optional<TetronimoInstance> const& GetNextBlock() { return m_NextBlock; }
 
 	olc::vi2d GetDropPosition() const;
 
@@ -292,6 +293,7 @@ private:
 	{
 		m_Tiles.assign(m_Tiles.size(), TileColor::None);
 		m_FallingBlock.reset();
+		m_NextBlock.reset();
 	}
 
 	bool TryMoveFallingBlock(olc::vi2d const& delta);
@@ -307,6 +309,7 @@ private:
 	float m_InputTimer{};
 	std::vector<TileColor> m_Tiles{};
 	std::optional<TetronimoInstance> m_FallingBlock{};
+	std::optional<TetronimoInstance> m_NextBlock{};
 
 	std::mt19937 m_RandStream;
 };
