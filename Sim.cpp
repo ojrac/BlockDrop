@@ -1,5 +1,8 @@
 #include "Sim.h"
 
+#include <algorithm>
+#include <set>
+
 namespace BlockDrop
 {
 
@@ -113,6 +116,85 @@ bool Sim::TryMoveFallingBlock(olc::vi2d const& delta)
 	}
 }
 
+void Sim::TransferBlockToTiles(TetronimoInstance const& tetronimo)
+{
+	std::set<int> changedRows{};
+
+	auto tetronimoPosition = tetronimo.GetPosition();
+	for (auto const& square : tetronimo.GetSquares())
+	{
+		auto pos = square.AsVi2d() + tetronimoPosition;
+		int row = pos.y;
+		int col = pos.x;
+		if (!IsValidPosition(row, col))
+		{
+			continue;
+		}
+		changedRows.insert(row);
+		if (_At(row, col) == TileColor::None)
+		{
+			_At(row, col) = tetronimo.GetTileColor();
+		}
+	}
+
+	std::vector<int> clearedRows{};
+	for (int row : changedRows)
+	{
+		if (RowFilled(row))
+		{
+			clearedRows.push_back(row);
+		}
+	}
+
+	if (clearedRows.empty())
+	{
+		return;
+	}
+
+	// Move the blocks down
+	int dest = clearedRows.back();
+	clearedRows.pop_back();
+	int src = dest - 1;
+
+	// Move tiles from the top to the bottom
+	while (dest >= 0)
+	{
+		// If the row we're pulling from was cleared, skip over it as a source
+		while (!clearedRows.empty() && clearedRows.back() == src)
+		{
+			src--;
+			clearedRows.pop_back();
+		}
+
+		for (int col = 0; col < m_Width; ++col)
+		{
+			TileColor replacement{ TileColor::None };
+			if (src > 0)
+			{
+				replacement = At(src, col);
+			}
+			_At(dest, col) = replacement;
+		}
+
+		dest--;
+		src--;
+	}
+}
+
+bool Sim::RowFilled(int row) const
+{
+	for (int col = 0; col < m_Width; ++col)
+	{
+		if (At(row, col) == TileColor::None)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 bool Sim::HandleInput(Input const& input)
 {
 	if (input.bRotateLeft && TryRotateFallingBlock(-1))
@@ -162,7 +244,7 @@ bool Sim::HasCollision(TetronimoInstance const& tetronimo) const
 		{
 			return true;
 		}
-		if (row >= 0 && _At(pos.y, pos.x) != TileColor::None)
+		if (row >= 0 && At(pos.y, pos.x) != TileColor::None)
 		{
 			return true;
 		}

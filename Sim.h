@@ -121,7 +121,8 @@ public:
 
 	void Rotate(int direction)
 	{
-		m_RotationIndex = (m_RotationIndex + direction) % m_Tetronimo->m_RotatedTileOffsets.size();
+		const int size = static_cast<int>(m_Tetronimo->m_RotatedTileOffsets.size());
+		m_RotationIndex = (m_RotationIndex + direction) % size;
 	}
 
 private:
@@ -255,9 +256,11 @@ public:
 	{
 		_At(row, col) = tile;
 	}
-	TileColor At(int row, int col)
+	TileColor At(int row, int col) const
 	{
-		return _At(row, col);
+		assert(IsValidPosition(row, col));
+
+		return m_Tiles[row * m_Width + col];
 	}
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
@@ -280,12 +283,6 @@ private:
 
 		return m_Tiles[row * m_Width + col];
 	}
-	TileColor const& _At(int row, int col) const
-	{
-		assert(IsValidPosition(row, col));
-
-		return m_Tiles[row * m_Width + col];
-	}
 
 	bool HandleInput(Input const& input);
 
@@ -300,24 +297,8 @@ private:
 	bool TryMoveFallingBlock(olc::vi2d const& delta);
 	bool TryRotateFallingBlock(int direction);
 
-	void TransferBlockToTiles(TetronimoInstance const& tetronimo)
-	{
-		auto tetronimoPosition = tetronimo.GetPosition();
-		for (auto const& square : tetronimo.GetSquares())
-		{
-			auto pos = square.AsVi2d() + tetronimoPosition;
-			int row = pos.y;
-			int col = pos.x;
-			if (!IsValidPosition(row, col))
-			{
-				continue;
-			}
-			if (_At(row, col) == TileColor::None)
-			{
-				_At(row, col) = tetronimo.GetTileColor();
-			}
-		}
-	}
+	void TransferBlockToTiles(TetronimoInstance const& tetronimo);
+	bool RowFilled(int col) const;
 
 private:
 	int m_Width{};
