@@ -21,13 +21,18 @@ public:
 	static constexpr int SCREEN_WIDTH_PX = 480;
 	static constexpr int SCREEN_HEIGHT_PX = 640;
 
+	// UI element anchors
+	static constexpr int k_UiTop{ (SCREEN_HEIGHT_PX - BOARD_TILE_HEIGHT_PX) / 2 };
+	static constexpr int k_BoardLeft{ 25 };
+	static constexpr int k_BoardRight{ k_BoardLeft + BOARD_TILE_WIDTH_PX + 25 };
+	static constexpr int k_SidebarWidth{ 110 };
+	static constexpr int k_SidebarHeight{ 100 };
+	static constexpr int k_SidebarLeft{ k_BoardRight + 25 };
+	static constexpr int k_SidebarRight{ k_SidebarLeft + k_SidebarWidth };
+
 public:
 	App()
 		: m_Sim(BOARD_TILE_WIDTH, BOARD_TILE_HEIGHT)
-		, m_BoardTopLeft{
-			(SCREEN_WIDTH_PX - BOARD_TILE_WIDTH_PX) / 2,
-			(SCREEN_HEIGHT_PX - BOARD_TILE_HEIGHT_PX) / 2,
-		}
 	{
 		srand(static_cast<uint32_t>(time(nullptr)));
 		sAppName = "BlockDrop";
@@ -60,7 +65,7 @@ private:
 	std::unique_ptr<olc::Sprite> m_TileSprite{};
 	std::unique_ptr<olc::Decal> m_TileDecal{};
 
-	olc::vi2d m_BoardTopLeft{};
+	olc::vi2d m_BoardTopLeft{ k_BoardLeft, k_UiTop };
 
 	Sim m_Sim;
 
@@ -82,18 +87,33 @@ private:
 		vi2d topRight{ m_BoardTopLeft.x + BOARD_TILE_WIDTH_PX, m_BoardTopLeft.y };
 		vi2d bottomRight{ m_BoardTopLeft + size };
 
-		// Border
+		// Sidebar
+		DrawBorder({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, 3, olc::GREY);
+		FillRect({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, olc::BLACK);
+		if (m_Sim.GetNextBlock().has_value())
 		{
-			constexpr int borderPx{ 3 };
-			for (int i = 1; i <= borderPx; ++i)
-			{
-				vi2d borderOffset{ i, i };
-				DrawRect(m_BoardTopLeft - borderOffset, size + borderOffset + borderOffset, olc::GREY);
-			}
+			auto& tetronimo = m_Sim.GetNextBlock().value();
+			olc::vi2d origin{
+				k_SidebarLeft + (k_SidebarWidth / 2),
+				k_UiTop + (k_SidebarHeight / 2) - TILE_SIZE_PX,
+			};
+			origin += tetronimo.GetCenterOffset() * TILE_SIZE_PX;
+			DrawTetronimo(tetronimo, origin);
 		}
 
+
 		// Board
+		DrawBorder(m_BoardTopLeft, size, 3, olc::GREY);
 		FillRect(m_BoardTopLeft, size, olc::BLACK);
+	}
+
+	void DrawBorder(olc::vi2d const& topLeft, olc::vi2d const& size, int borderWidth, olc::Pixel color)
+	{
+		for (int i = 1; i <= borderWidth; ++i)
+		{
+			olc::vi2d borderOffset{ i, i };
+			DrawRect(topLeft - borderOffset, size + borderOffset + borderOffset, olc::GREY);
+		}
 	}
 
 	static olc::Pixel GetColor(TileColor color)
@@ -122,7 +142,11 @@ private:
 
 	olc::vi2d BoardToScreen(int row, int column) const
 	{
-		return m_BoardTopLeft + olc::vi2d{ column * TILE_SIZE_PX, row * TILE_SIZE_PX };
+		return BoardToScreen({ column, row });
+	}
+	olc::vi2d BoardToScreen(olc::vi2d const& pos) const
+	{
+		return m_BoardTopLeft + (pos * TILE_SIZE_PX);
 	}
 
 	void DrawTiles()
@@ -150,16 +174,11 @@ private:
 		if (optFallingBlock.has_value())
 		{
 			auto& tetronimo = optFallingBlock.value();
-			auto color = GetColor(tetronimo.GetTileColor());
 			auto position = tetronimo.GetPosition();
-			for (auto& square : tetronimo.GetSquares())
-			{
-				int row = position.y + square.m_Row;
-				int col = position.x + square.m_Column;
-				DrawTile(row, col, color);
-			}
+			DrawTetronimo(tetronimo, BoardToScreen(position));
 
 			// Drop preview
+			auto color = GetColor(tetronimo.GetTileColor());
 			position = m_Sim.GetDropPosition();
 			for (auto& square : tetronimo.GetSquares())
 			{
@@ -170,16 +189,32 @@ private:
 		}
 	}
 
-	void DrawTile(int row, int col, olc::Pixel const& color)
+	void DrawTetronimo(TetronimoInstance const& tetronimo, olc::vi2d origin)
+	{
+		auto color = GetColor(tetronimo.GetTileColor());
+		for (auto& square : tetronimo.GetSquares())
+		{
+			olc::vi2d pos = origin + olc::vi2d{ square.m_Column * TILE_SIZE_PX, square.m_Row * TILE_SIZE_PX };
+			DrawTileAtPixel(pos, color);
+		}
+	}
+
+	void DrawTile(int row, int col, olc::Pixel color)
 	{
 		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
 		{
 			return;
 		}
-		DrawDecal(BoardToScreen(row, col), m_TileDecal.get(), { 1, 1 }, color);
+		DrawTileAtPixel(BoardToScreen(row, col), color);
 	}
 
-	void DrawTileOutline(int row, int col, BorderDirection directions, olc::Pixel const& color)
+	void DrawTileAtPixel(olc::vi2d pos, olc::Pixel color)
+	{
+		DrawDecal(pos, m_TileDecal.get(), { 1, 1 }, color);
+
+	}
+
+	void DrawTileOutline(int row, int col, BorderDirection directions, olc::Pixel color)
 	{
 		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
 		{

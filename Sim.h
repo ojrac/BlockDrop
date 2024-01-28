@@ -75,9 +75,10 @@ struct TetronimoSquare
 class Tetronimo
 {
 public:
-	Tetronimo(TileColor color, std::vector<std::vector<TetronimoSquare>> tileOffsets)
+	Tetronimo(TileColor color, std::vector<std::vector<TetronimoSquare>> tileOffsets, olc::vf2d centerOffset)
 		: m_Color(color)
 		, m_RotatedTileOffsets(tileOffsets)
+		, m_CenterOffset(centerOffset)
 	{
 	}
 
@@ -86,6 +87,7 @@ public:
 public: // Struct-ish, all public
 	TileColor m_Color;
 	std::vector<std::vector<TetronimoSquare>> m_RotatedTileOffsets;
+	olc::vf2d m_CenterOffset;
 };
 
 class TetronimoInstance
@@ -109,6 +111,10 @@ public:
 	olc::vi2d GetPosition() const
 	{
 		return m_Position;
+	}
+	olc::vf2d GetCenterOffset() const
+	{
+		return m_Tetronimo->m_CenterOffset;
 	}
 	void SetPosition(olc::vi2d const& position)
 	{
@@ -149,46 +155,46 @@ private:
 		: m_Red(TileColor::Red, {
 			{ {-2, 0, BorderDirection::TBL}, {-1, 0, BorderDirection::TB}, {0, 0, BorderDirection::TB}, {1, 0, BorderDirection::TRB} },
 			{ {0, -1, BorderDirection::TRL}, {0, 0, BorderDirection::LR}, {0, 1, BorderDirection::LR}, {0, 2, BorderDirection::LBR} },
-			})
+			}, {0, 0.5f})
 		// S
 		, m_Blue(TileColor::Blue, {
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::RB}, {0, 0, BorderDirection::TL}, {1, 0, BorderDirection::TRB} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::BL}, {1, 1, BorderDirection::TR}, {1, 2, BorderDirection::LBR} },
 			{ {-1, 2, BorderDirection::TBL}, {0, 2, BorderDirection::RB}, {0, 1, BorderDirection::TL}, {1, 1, BorderDirection::TRB} },
 			{ {-1, 0, BorderDirection::TRL}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::TR}, {0, 2, BorderDirection::RBL} },
-			})
+			}, {-0.5f, 0})
 		// Z
 		, m_Cyan(TileColor::Cyan, {
 			{ {-1, 0, BorderDirection::TBL}, {0, 0, BorderDirection::TR}, {0, 1, BorderDirection::BL}, {1, 1, BorderDirection::TRB} },
 			{ {1, 0, BorderDirection::TRL}, {1, 1, BorderDirection::RB}, {0, 1, BorderDirection::TL}, {0, 2, BorderDirection::RBL} },
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TR}, {0, 2, BorderDirection::BL}, {1, 2, BorderDirection::TRB} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RB}, {-1, 1, BorderDirection::TL}, {-1, 2, BorderDirection::RBL} },
-			})
+			}, { -0.5f, 0 })
 		// J
 		, m_Magenta(TileColor::Magenta, {
 			{ {-1, 0, BorderDirection::TRL}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TRB} },
 			{ {1, 0, BorderDirection::TRB}, {0, 0, BorderDirection::TL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::RBL} },
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TR}, {1, 2, BorderDirection::RBL} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::RB}, {-1, 2, BorderDirection::TBL} },
-			})
+			}, { -0.5f, 0 })
 		// L
 		, m_Yellow(TileColor::Yellow, {
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::RB}, {1, 0, BorderDirection::TRL} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::RL}, {0, 2, BorderDirection::BL}, {1, 2, BorderDirection::TRB} },
 			{ {-1, 2, BorderDirection::RBL}, {-1, 1, BorderDirection::TL}, {0, 1, BorderDirection::TB}, {1, 1, BorderDirection::TRB} },
 			{ {-1, 0, BorderDirection::TBL}, {0, 0, BorderDirection::TR}, {0, 1, BorderDirection::LR}, {0, 2, BorderDirection::RBL} },
-			})
+			}, { -0.5f, 0 })
 		// T
 		, m_Green(TileColor::Green, {
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::Bottom}, {0, 0, BorderDirection::TRL}, {1, 1, BorderDirection::TRB} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::Left}, {1, 1, BorderDirection::TRB}, {0, 2, BorderDirection::RBL} },
 			{ {-1, 1, BorderDirection::TBL}, {0, 1, BorderDirection::Top}, {0, 2, BorderDirection::RBL}, {1, 1, BorderDirection::TRB} },
 			{ {0, 0, BorderDirection::TRL}, {0, 1, BorderDirection::Right}, {-1, 1, BorderDirection::TBL}, {0, 2, BorderDirection::RBL} },
-			})
+			}, { -0.5f, 0 })
 		// O
 		, m_Orange(TileColor::Orange, {
 			{ {-1, 0, BorderDirection::TL}, {0, 0, BorderDirection::TR}, {-1, 1, BorderDirection::BL}, {0, 1, BorderDirection::RB} },
-			})
+			}, { 0, 0 })
 	{
 	}
 	TetronimoFactory(TetronimoFactory&) = delete;
