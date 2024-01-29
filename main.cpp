@@ -90,15 +90,17 @@ private:
 		// Sidebar
 		DrawBorder({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, 3, olc::GREY);
 		FillRect({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, olc::BLACK);
-		if (m_Sim.GetNextBlock().has_value())
+		// Preview
+		auto* tetronimo = TetronimoFactory::GetTetronimoByColor(m_Sim.GetNextBlockColor());
+		if (tetronimo != nullptr)
 		{
-			auto& tetronimo = m_Sim.GetNextBlock().value();
 			olc::vi2d origin{
 				k_SidebarLeft + (k_SidebarWidth / 2),
 				k_UiTop + (k_SidebarHeight / 2) - TILE_SIZE_PX,
 			};
-			origin += tetronimo.GetCenterOffset() * TILE_SIZE_PX;
-			DrawTetronimo(tetronimo, origin);
+			origin += tetronimo->m_CenterOffset * TILE_SIZE_PX;
+
+			DrawTetronimoSquares(origin, tetronimo->m_Color, tetronimo->m_RotatedTileOffsets[0]);
 		}
 
 
@@ -191,8 +193,13 @@ private:
 
 	void DrawTetronimo(TetronimoInstance const& tetronimo, olc::vi2d origin)
 	{
-		auto color = GetColor(tetronimo.GetTileColor());
-		for (auto& square : tetronimo.GetSquares())
+		DrawTetronimoSquares(origin, tetronimo.GetTileColor(), tetronimo.GetSquares());
+	}
+
+	void DrawTetronimoSquares(olc::vi2d origin, TileColor tileColor, std::vector<TetronimoSquare> const& squares)
+	{
+		auto color = GetColor(tileColor);
+		for (auto& square : squares)
 		{
 			olc::vi2d pos = origin + olc::vi2d{ square.m_Column * TILE_SIZE_PX, square.m_Row * TILE_SIZE_PX };
 			DrawTileAtPixel(pos, color);

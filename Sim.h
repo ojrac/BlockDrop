@@ -142,11 +142,16 @@ class TetronimoFactory
 public:
 	static TetronimoInstance New(int row, int column, TileColor color)
 	{
-		Tetronimo* sharedData = Instance().GetByColor(color);
+		Tetronimo* sharedData = GetTetronimoByColor(color);
 		assert(sharedData != nullptr);
 
 		TetronimoInstance result{ *sharedData, {column, row} };
 		return result;
+	}
+
+	static Tetronimo* GetTetronimoByColor(TileColor color)
+	{
+		return Instance().GetByColor(color);
 	}
 
 private:
@@ -270,7 +275,7 @@ public:
 	}
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
-	std::optional<TetronimoInstance> const& GetNextBlock() { return m_NextBlock; }
+	TileColor const& GetNextBlockColor() { return (m_NextBlock.has_value()) ? m_NextBlock->GetTileColor() : TileColor::None; }
 
 	olc::vi2d GetDropPosition() const;
 
