@@ -16,6 +16,7 @@ bool HasDirection(BorderDirection value, BorderDirection other)
 void Sim::Update(float deltaTime, Input const& input)
 {
 	m_InputTimer -= deltaTime;
+	m_LockDelayTimer -= deltaTime;
 
 	if (HandleInput(input))
 	{
@@ -24,11 +25,13 @@ void Sim::Update(float deltaTime, Input const& input)
 
 	if (m_FallingBlock.has_value())
 	{
-		m_DropTimer += deltaTime * GetGravity();
+		m_DropTimer += deltaTime * GetGravity(input);
+		bool bDropped = m_DropTimer > 1.f;
+		bool bFirstDrop = true;
 		while (m_DropTimer > 1.f && m_FallingBlock.has_value())
 		{
 			TetronimoInstance copy = m_FallingBlock.value();
-			if (!TryMoveFallingBlock({ 0, 1 }))
+			if (!TryMoveFallingBlock({ 0, 1 }) && bFirstDrop)
 			{
 				// Place the current position blocks as tiles
 				TransferBlockToTiles(m_FallingBlock.value());
@@ -36,7 +39,14 @@ void Sim::Update(float deltaTime, Input const& input)
 				m_NextBlockTimer = s_TetronimoSpawnDelay;
 			}
 
+			bFirstDrop = false;
 			m_DropTimer -= 1.f;
+		}
+
+		if (bDropped && m_FallingBlock.has_value() && IsBlockOnGround(m_FallingBlock.value()))
+		{
+			// Override drop timer to give a fixed amount of "lock" delay
+			m_LockDelayTimer = s_LockDelay;
 		}
 	}
 	else
@@ -104,24 +114,15 @@ olc::vi2d Sim::GetDropPosition() const
 	return lastGoodPosition;
 }
 
-bool Sim::TryRotateFallingBlock(int direction)
+bool Sim::IsBlockOnGround(TetronimoInstance block)
 {
-	if (!m_FallingBlock.has_value())
-	{
-		return false;
-	}
+	return !TryMoveBlock(block, { 0, 1 });
+}
 
-	TetronimoInstance copy = m_FallingBlock.value();
-	copy.Rotate(direction);
-	if (HasCollision(copy))
-	{
-		return false;
-	}
-	else
-	{
-		m_FallingBlock = copy;
-		return true;
-	}
+bool Sim::TryMoveBlock(TetronimoInstance& block, olc::vi2d const& delta)
+{
+	block.Move(delta);
+	return !HasCollision(block);
 }
 
 bool Sim::TryMoveFallingBlock(olc::vi2d const& delta)
@@ -132,7 +133,24 @@ bool Sim::TryMoveFallingBlock(olc::vi2d const& delta)
 	}
 
 	TetronimoInstance copy = m_FallingBlock.value();
-	copy.Move(delta);
+	if (TryMoveBlock(copy, delta))
+	{
+		m_FallingBlock = copy;
+		return true;
+	}
+
+	return false;
+}
+
+bool Sim::TryRotateFallingBlock(int direction)
+{
+	if (!m_FallingBlock.has_value())
+	{
+		return false;
+	}
+
+	TetronimoInstance copy = m_FallingBlock.value();
+	copy.Rotate(direction);
 	if (HasCollision(copy))
 	{
 		return false;
@@ -225,13 +243,13 @@ bool Sim::RowFilled(int row) const
 
 bool Sim::HandleInput(Input const& input)
 {
-	if (input.bRotateLeft && TryRotateFallingBlock(-1))
+	if (input.bRotateLeft)
 	{
-		m_DropTimer = std::max(s_RotateAirTimeSec, m_DropTimer);
+		TryRotateFallingBlock(-1);
 	}
-	if (input.bRotateRight && TryRotateFallingBlock(1))
+	if (input.bRotateRight)
 	{
-		m_DropTimer = std::max(s_RotateAirTimeSec, m_DropTimer);
+		TryRotateFallingBlock(1);
 	}
 
 	if (m_InputTimer > 0 || !m_FallingBlock.has_value())
@@ -246,14 +264,6 @@ bool Sim::HandleInput(Input const& input)
 	if (input.bRight && TryMoveFallingBlock({ 1, 0 }))
 	{
 		return true;
-	}
-
-	if (input.bDrop && m_FallingBlock.has_value())
-	{
-		TetronimoInstance& tetronimo = m_FallingBlock.value();
-		olc::vi2d dropPosition = GetDropPosition();
-		tetronimo.SetPosition(dropPosition);
-		m_DropTimer = 0;
 	}
 
 	return false;

@@ -246,6 +246,7 @@ public:
 	static constexpr float s_RotateAirTimeSec = 0.1f;
 	static constexpr float s_InputRepeatDelaySec = 0.125f;
 	static constexpr float s_TetronimoSpawnDelay = 0.1f;
+	static constexpr float s_LockDelay = 0.5f;
 
 public:
 	Sim(int width, int height)
@@ -268,11 +269,6 @@ public:
 		assert(IsValidPosition(row, col));
 
 		return m_Tiles[row * m_Width + col];
-	}
-
-	float GetGravity()
-	{
-		return 0.01667f * 60.f;
 	}
 
 	std::optional<TetronimoInstance> const& GetFallingBlock() { return m_FallingBlock; }
@@ -299,6 +295,15 @@ private:
 		return m_Tiles[row * m_Width + col];
 	}
 
+	float GetGravity(Input const& input)
+	{
+		if (input.bDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
+		{
+			return 20.f * 60.f;
+		}
+		return 0.01667f * 60.f;
+	}
+
 	bool HandleInput(Input const& input);
 
 	bool HasCollision(TetronimoInstance const& tetronimo) const;
@@ -310,6 +315,8 @@ private:
 		m_NextBlocks.clear();
 	}
 
+	bool IsBlockOnGround(TetronimoInstance block);
+	bool TryMoveBlock(TetronimoInstance& block, olc::vi2d const& delta);
 	bool TryMoveFallingBlock(olc::vi2d const& delta);
 	bool TryRotateFallingBlock(int direction);
 
@@ -319,6 +326,7 @@ private:
 private:
 	int m_Width{};
 	int m_Height{};
+	float m_LockDelayTimer{};
 	float m_NextBlockTimer{};
 	float m_DropTimer{};
 	float m_InputTimer{};
