@@ -39,7 +39,12 @@ void Sim::Update(float deltaTime, Input const& input)
 				m_NextBlockTimer = s_TetronimoSpawnDelay;
 			}
 
-			bFirstDrop = false;
+			if (!input.bHardDrop)
+			{
+				// For a hard drop, allow immediate locking.
+				// Otherwise, wait for a lock delay.
+				bFirstDrop = false;
+			}
 			m_DropTimer -= 1.f;
 		}
 
@@ -240,6 +245,18 @@ bool Sim::RowFilled(int row) const
 	return true;
 }
 
+float Sim::GetGravity(Input const& input)
+{
+	if (input.bHardDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
+	{
+		return 20.f * 60.f;
+	}
+	if (input.bSoftDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
+	{
+		return 20.f;
+	}
+	return 0.01667f * 60.f;
+}
 
 bool Sim::HandleInput(Input const& input)
 {

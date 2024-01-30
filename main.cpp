@@ -256,7 +256,8 @@ private:
 		result.bRight = GetKey(olc::Key::RIGHT).bHeld;
 		result.bRotateLeft = GetKey(olc::Key::Q).bPressed;
 		result.bRotateRight = GetKey(olc::Key::E).bPressed || GetKey(olc::Key::UP).bPressed;
-		result.bDrop = GetKey(olc::Key::DOWN).bPressed;
+		result.bSoftDrop = GetKey(olc::Key::DOWN).bHeld;
+		result.bHardDrop = GetKey(olc::Key::SPACE).bPressed;
 
 		return result;
 	}

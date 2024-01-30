@@ -14,7 +14,8 @@ namespace BlockDrop
 struct Input {
 	bool bLeft;
 	bool bRight;
-	bool bDrop;
+	bool bHardDrop;
+	bool bSoftDrop;
 	bool bRotateLeft;
 	bool bRotateRight;
 };
@@ -295,14 +296,7 @@ private:
 		return m_Tiles[row * m_Width + col];
 	}
 
-	float GetGravity(Input const& input)
-	{
-		if (input.bDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
-		{
-			return 20.f * 60.f;
-		}
-		return 0.01667f * 60.f;
-	}
+	float GetGravity(Input const& input);
 
 	bool HandleInput(Input const& input);
 
