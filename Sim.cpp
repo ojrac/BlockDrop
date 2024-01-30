@@ -32,10 +32,6 @@ void Sim::Update(float deltaTime, Input const& input)
 	// TODO: Scale with level
 	m_DropTimer = 0.7f;
 
-	if (!m_NextBlock.has_value())
-	{
-		m_NextBlock = TetronimoFactory::New(0, 0, RandomColor());
-	}
 	if (m_FallingBlock.has_value())
 	{
 		TetronimoInstance copy = m_FallingBlock.value();
@@ -49,19 +45,43 @@ void Sim::Update(float deltaTime, Input const& input)
 	else
 	{
 		// Spawn a new block
-		TetronimoInstance newBlockCopy = m_NextBlock.value();
-		newBlockCopy.SetPosition({ m_Width / 2, 0 });
-		if (HasCollision(newBlockCopy))
+		TetronimoInstance newBlock = TetronimoFactory::New(0, m_Width / 2, PopNextBlockColor());
+		if (HasCollision(newBlock))
 		{
-			TransferBlockToTiles(newBlockCopy);
+			TransferBlockToTiles(newBlock);
 			GameOver();
 		}
 		else
 		{
-			m_FallingBlock = std::make_optional<TetronimoInstance>(newBlockCopy);
-			m_NextBlock = TetronimoFactory::New(0, 0, RandomColor());
+			m_FallingBlock = std::make_optional<TetronimoInstance>(newBlock);
 		}
 	}
+}
+
+TileColor Sim::GetNextBlockColor()
+{
+	if (m_NextBlocks.empty())
+	{
+		m_NextBlocks = {
+			TileColor::Red,
+			TileColor::Blue,
+			TileColor::Cyan,
+			TileColor::Magenta,
+			TileColor::Yellow,
+			TileColor::Green,
+			TileColor::Orange,
+		};
+		std::shuffle(m_NextBlocks.begin(), m_NextBlocks.end(), m_RandStream);
+	}
+
+	return m_NextBlocks.back();
+}
+TileColor Sim::PopNextBlockColor()
+{
+	auto result = GetNextBlockColor();
+	assert(!m_NextBlocks.empty());
+	m_NextBlocks.pop_back();
+	return result;
 }
 
 olc::vi2d Sim::GetDropPosition() const
