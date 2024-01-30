@@ -15,7 +15,6 @@ bool HasDirection(BorderDirection value, BorderDirection other)
 
 void Sim::Update(float deltaTime, Input const& input)
 {
-	m_DropTimer -= deltaTime;
 	m_InputTimer -= deltaTime;
 
 	if (HandleInput(input))
@@ -23,37 +22,40 @@ void Sim::Update(float deltaTime, Input const& input)
 		m_InputTimer = s_InputRepeatDelaySec;
 	}
 
-	if (m_DropTimer > 0)
-	{
-		return;
-	}
-
-	// Wait before the next step
-	// TODO: Scale with level
-	m_DropTimer = 0.7f;
-
 	if (m_FallingBlock.has_value())
 	{
-		TetronimoInstance copy = m_FallingBlock.value();
-		if (!TryMoveFallingBlock({ 0, 1 }))
+		m_DropTimer += deltaTime * GetGravity();
+		while (m_DropTimer > 1.f && m_FallingBlock.has_value())
 		{
-			// Place the current position blocks as tiles
-			TransferBlockToTiles(m_FallingBlock.value());
-			m_FallingBlock.reset();
+			TetronimoInstance copy = m_FallingBlock.value();
+			if (!TryMoveFallingBlock({ 0, 1 }))
+			{
+				// Place the current position blocks as tiles
+				TransferBlockToTiles(m_FallingBlock.value());
+				m_FallingBlock.reset();
+				m_NextBlockTimer = s_TetronimoSpawnDelay;
+			}
+
+			m_DropTimer -= 1.f;
 		}
 	}
 	else
 	{
-		// Spawn a new block
-		TetronimoInstance newBlock = TetronimoFactory::New(0, m_Width / 2, PopNextBlockColor());
-		if (HasCollision(newBlock))
+		m_NextBlockTimer -= deltaTime;
+		if (m_NextBlockTimer <= 0.f)
 		{
-			TransferBlockToTiles(newBlock);
-			GameOver();
-		}
-		else
-		{
-			m_FallingBlock = std::make_optional<TetronimoInstance>(newBlock);
+			// Spawn a new block
+			TetronimoInstance newBlock = TetronimoFactory::New(0, m_Width / 2, PopNextBlockColor());
+			if (HasCollision(newBlock))
+			{
+				TransferBlockToTiles(newBlock);
+				GameOver();
+			}
+			else
+			{
+				m_FallingBlock = std::make_optional<TetronimoInstance>(newBlock);
+				m_DropTimer = 0.f;
+			}
 		}
 	}
 }
