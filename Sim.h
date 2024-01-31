@@ -13,7 +13,9 @@ namespace BlockDrop
 
 struct Input {
 	bool bLeft;
+	bool bLeftHeld;
 	bool bRight;
+	bool bRightHeld;
 	bool bHardDrop;
 	bool bSoftDrop;
 	bool bRotateLeft;
@@ -245,7 +247,8 @@ class Sim
 {
 public:
 	static constexpr float s_RotateAirTimeSec = 0.1f;
-	static constexpr float s_InputRepeatDelaySec = 0.125f;
+	static constexpr float s_InitialInputRepeatDelaySec = 0.167f;
+	static constexpr float s_InputRepeatDelaySec = 0.033f;
 	static constexpr float s_TetronimoSpawnDelay = 0.1f;
 	static constexpr float s_LockDelay = 0.5f;
 
@@ -298,7 +301,7 @@ private:
 
 	float GetGravity(Input const& input);
 
-	bool HandleInput(Input const& input);
+	float HandleInput(Input const& input);
 
 	bool HasCollision(TetronimoInstance const& tetronimo) const;
 

@@ -18,10 +18,7 @@ void Sim::Update(float deltaTime, Input const& input)
 	m_InputTimer -= deltaTime;
 	m_LockDelayTimer -= deltaTime;
 
-	if (HandleInput(input))
-	{
-		m_InputTimer = s_InputRepeatDelaySec;
-	}
+	m_InputTimer = std::max(m_InputTimer, HandleInput(input));
 
 	if (m_FallingBlock.has_value())
 	{
@@ -258,7 +255,7 @@ float Sim::GetGravity(Input const& input)
 	return 0.01667f * 60.f;
 }
 
-bool Sim::HandleInput(Input const& input)
+float Sim::HandleInput(Input const& input)
 {
 	if (input.bRotateLeft)
 	{
@@ -269,21 +266,36 @@ bool Sim::HandleInput(Input const& input)
 		TryRotateFallingBlock(1);
 	}
 
-	if (m_InputTimer > 0 || !m_FallingBlock.has_value())
+	if (!m_FallingBlock.has_value())
 	{
-		return false;
+		return 0.f;
 	}
 
 	if (input.bLeft && TryMoveFallingBlock({ -1, 0 }))
 	{
-		return true;
+		return s_InitialInputRepeatDelaySec;
 	}
 	if (input.bRight && TryMoveFallingBlock({ 1, 0 }))
 	{
-		return true;
+		return s_InitialInputRepeatDelaySec;
 	}
 
-	return false;
+	// Repeat left/right:
+	if (m_InputTimer > 0)
+	{
+		return 0.f;
+	}
+
+	if (input.bLeftHeld && TryMoveFallingBlock({ -1, 0 }))
+	{
+		return s_InputRepeatDelaySec;
+	}
+	if (input.bRightHeld && TryMoveFallingBlock({ 1, 0 }))
+	{
+		return s_InputRepeatDelaySec;
+	}
+
+	return 0.f;
 }
 
 bool Sim::HasCollision(TetronimoInstance const& tetronimo) const

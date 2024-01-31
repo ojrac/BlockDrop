@@ -252,8 +252,10 @@ private:
 	Input GetInput()
 	{
 		Input result = {};
-		result.bLeft = GetKey(olc::Key::LEFT).bHeld;
-		result.bRight = GetKey(olc::Key::RIGHT).bHeld;
+		result.bLeft = GetKey(olc::Key::LEFT).bPressed;
+		result.bLeftHeld = GetKey(olc::Key::LEFT).bHeld;
+		result.bRight = GetKey(olc::Key::RIGHT).bPressed;
+		result.bRightHeld = GetKey(olc::Key::RIGHT).bHeld;
 		result.bRotateLeft = GetKey(olc::Key::Q).bPressed;
 		result.bRotateRight = GetKey(olc::Key::E).bPressed || GetKey(olc::Key::UP).bPressed;
 		result.bSoftDrop = GetKey(olc::Key::DOWN).bHeld;
