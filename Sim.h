@@ -254,8 +254,8 @@ public:
 	static constexpr float s_LockDelay = 0.5f;
 
 	// Score and levels
-	static constexpr int k_MaxLevel = 10;
-	static constexpr int k_RowsPerLevelUp = 10;
+	static constexpr int s_MaxLevel = 10;
+	static constexpr int s_RowsPerLevelUp = 10;
 
 public:
 	Sim(int width, int height)

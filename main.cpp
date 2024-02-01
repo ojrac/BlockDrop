@@ -11,34 +11,34 @@ namespace BlockDrop
 class App : public olc::PixelGameEngine
 {
 public:
-	static constexpr int TILE_SIZE_PX = 26;
+	static constexpr int s_TileSizePx = 26;
 
-	static constexpr int BOARD_TILE_WIDTH = 10;
-	static constexpr int BOARD_TILE_HEIGHT = 20;
+	static constexpr int s_BoardTileWidth = 10;
+	static constexpr int s_BoardTileHeight = 20;
 
-	static constexpr int BOARD_TILE_WIDTH_PX = 10 * TILE_SIZE_PX;
-	static constexpr int BOARD_TILE_HEIGHT_PX = 20 * TILE_SIZE_PX;
+	static constexpr int s_BoardTileWidthPx = 10 * s_TileSizePx;
+	static constexpr int s_BoardTileHeightPx = 20 * s_TileSizePx;
 
-	static constexpr int SCREEN_WIDTH_PX = 480;
-	static constexpr int SCREEN_HEIGHT_PX = 640;
+	static constexpr int ScreenWidthPx = 480;
+	static constexpr int s_ScreenHeightPx = 640;
 
 	// UI element anchors
-	static constexpr int k_UiTop{ (SCREEN_HEIGHT_PX - BOARD_TILE_HEIGHT_PX) / 2 };
-	static constexpr int k_BoardLeft{ 25 };
-	static constexpr int k_BoardRight{ k_BoardLeft + BOARD_TILE_WIDTH_PX + 25 };
-	static constexpr int k_SidebarWidth{ 110 };
-	static constexpr int k_SidebarPreviewHeight{ 100 };
-	static constexpr int k_SidebarNumbersTop{ k_UiTop + k_SidebarPreviewHeight + 25 };
-	static constexpr int k_SidebarNumbersTextTop{ k_SidebarNumbersTop + 8 };
-	static constexpr int k_SidebarNumbersLineHeight{ 24 };
-	static constexpr int k_SidebarNumbersHeight{ 102 };
-	static constexpr int k_SidebarLeft{ k_BoardRight + 25 };
-	static constexpr int k_SidebarRight{ k_SidebarLeft + k_SidebarWidth };
-	static constexpr int k_SidebarNumbersLeft{ k_SidebarLeft + 10 };
+	static constexpr int s_UiTop{ (s_ScreenHeightPx - s_BoardTileHeightPx) / 2 };
+	static constexpr int s_BoardLeft{ 25 };
+	static constexpr int s_BoardRight{ s_BoardLeft + s_BoardTileWidthPx + 25 };
+	static constexpr int s_SidebarWidth{ 110 };
+	static constexpr int s_SidebarPreviewHeight{ 100 };
+	static constexpr int s_SidebarNumbersTop{ s_UiTop + s_SidebarPreviewHeight + 25 };
+	static constexpr int s_SidebarNumbersTextTop{ s_SidebarNumbersTop + 8 };
+	static constexpr int s_SidebarNumbersLineHeight{ 24 };
+	static constexpr int s_SidebarNumbersHeight{ 102 };
+	static constexpr int s_SidebarLeft{ s_BoardRight + 25 };
+	static constexpr int s_SidebarRight{ s_SidebarLeft + s_SidebarWidth };
+	static constexpr int s_SidebarNumbersLeft{ s_SidebarLeft + 10 };
 
 public:
 	App()
-		: m_Sim(BOARD_TILE_WIDTH, BOARD_TILE_HEIGHT)
+		: m_Sim(s_BoardTileWidth, s_BoardTileHeight)
 	{
 		srand(static_cast<uint32_t>(time(nullptr)));
 		sAppName = "BlockDrop";
@@ -71,7 +71,7 @@ private:
 	std::unique_ptr<olc::Sprite> m_TileSprite{};
 	std::unique_ptr<olc::Decal> m_TileDecal{};
 
-	olc::vi2d m_BoardTopLeft{ k_BoardLeft, k_UiTop };
+	olc::vi2d m_BoardTopLeft{ s_BoardLeft, s_UiTop };
 
 	Sim m_Sim;
 
@@ -89,37 +89,37 @@ private:
 	{
 		using namespace olc;
 
-		vi2d size{ BOARD_TILE_WIDTH_PX, BOARD_TILE_HEIGHT_PX };
-		vi2d topRight{ m_BoardTopLeft.x + BOARD_TILE_WIDTH_PX, m_BoardTopLeft.y };
+		vi2d size{ s_BoardTileWidthPx, s_BoardTileHeightPx };
+		vi2d topRight{ m_BoardTopLeft.x + s_BoardTileWidthPx, m_BoardTopLeft.y };
 		vi2d bottomRight{ m_BoardTopLeft + size };
 
 		// Sidebar: Preview
-		DrawBorder({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarPreviewHeight }, 3, olc::GREY);
-		FillRect({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarPreviewHeight }, olc::BLACK);
+		DrawBorder({ s_SidebarLeft, s_UiTop }, { s_SidebarWidth, s_SidebarPreviewHeight }, 3, olc::GREY);
+		FillRect({ s_SidebarLeft, s_UiTop }, { s_SidebarWidth, s_SidebarPreviewHeight }, olc::BLACK);
 		// Preview Tile
 		auto* tetronimo = TetronimoFactory::GetTetronimoByColor(m_Sim.GetNextBlockColor());
 		if (tetronimo != nullptr)
 		{
 			olc::vi2d origin{
-				k_SidebarLeft + (k_SidebarWidth / 2),
-				k_UiTop + (k_SidebarPreviewHeight / 2) - TILE_SIZE_PX,
+				s_SidebarLeft + (s_SidebarWidth / 2),
+				s_UiTop + (s_SidebarPreviewHeight / 2) - s_TileSizePx,
 			};
-			origin += tetronimo->m_CenterOffset * TILE_SIZE_PX;
+			origin += tetronimo->m_CenterOffset * s_TileSizePx;
 
 			DrawTetronimoSquares(origin, tetronimo->m_Color, tetronimo->m_RotatedTileOffsets[0]);
 		}
 
 		// Sidebar: Level and Score
-		DrawBorder({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, 3, olc::GREY);
-		FillRect({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, olc::BLACK);
+		DrawBorder({ s_SidebarLeft, s_SidebarNumbersTop }, { s_SidebarWidth, s_SidebarNumbersHeight }, 3, olc::GREY);
+		FillRect({ s_SidebarLeft, s_SidebarNumbersTop }, { s_SidebarWidth, s_SidebarNumbersHeight }, olc::BLACK);
 
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop,
+		DrawString(s_SidebarNumbersLeft, s_SidebarNumbersTextTop,
 			"Level:", olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + k_SidebarNumbersLineHeight,
+		DrawString(s_SidebarNumbersLeft, s_SidebarNumbersTextTop + s_SidebarNumbersLineHeight,
 			std::to_string(m_Sim.GetLevel()), olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 2 * k_SidebarNumbersLineHeight,
+		DrawString(s_SidebarNumbersLeft, s_SidebarNumbersTextTop + 2 * s_SidebarNumbersLineHeight,
 			"Score:", olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 3 * k_SidebarNumbersLineHeight,
+		DrawString(s_SidebarNumbersLeft, s_SidebarNumbersTextTop + 3 * s_SidebarNumbersLineHeight,
 			std::to_string(m_Sim.GetScore()), olc::WHITE, 2);
 
 		// Board
@@ -166,7 +166,7 @@ private:
 	}
 	olc::vi2d BoardToScreen(olc::vi2d const& pos) const
 	{
-		return m_BoardTopLeft + (pos * TILE_SIZE_PX);
+		return m_BoardTopLeft + (pos * s_TileSizePx);
 	}
 
 	void DrawTiles()
@@ -175,9 +175,9 @@ private:
 
 		// Board tiles
 		using namespace olc;
-		for (int row = 0; row < BOARD_TILE_HEIGHT; ++row)
+		for (int row = 0; row < s_BoardTileHeight; ++row)
 		{
-			for (int col = 0; col < BOARD_TILE_WIDTH; ++col)
+			for (int col = 0; col < s_BoardTileWidth; ++col)
 			{
 				const auto tile = m_Sim.At(row, col);
 				if (tile == TileColor::None)
@@ -219,14 +219,14 @@ private:
 		auto color = GetColor(tileColor);
 		for (auto& square : squares)
 		{
-			olc::vi2d pos = origin + olc::vi2d{ square.m_Column * TILE_SIZE_PX, square.m_Row * TILE_SIZE_PX };
+			olc::vi2d pos = origin + olc::vi2d{ square.m_Column * s_TileSizePx, square.m_Row * s_TileSizePx };
 			DrawTileAtPixel(pos, color);
 		}
 	}
 
 	void DrawTile(int row, int col, olc::Pixel color)
 	{
-		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
+		if (row < 0 || row > s_BoardTileHeight || col < 0 || col > s_BoardTileWidth)
 		{
 			return;
 		}
@@ -241,13 +241,13 @@ private:
 
 	void DrawTileOutline(int row, int col, BorderDirection directions, olc::Pixel color)
 	{
-		if (row < 0 || row > BOARD_TILE_HEIGHT || col < 0 || col > BOARD_TILE_WIDTH)
+		if (row < 0 || row > s_BoardTileHeight || col < 0 || col > s_BoardTileWidth)
 		{
 			return;
 		}
 
 		olc::vi2d topLeft = BoardToScreen(row, col);
-		olc::vi2d bottomRight{ topLeft.x + TILE_SIZE_PX - 1, topLeft.y + TILE_SIZE_PX - 1 };
+		olc::vi2d bottomRight{ topLeft.x + s_TileSizePx - 1, topLeft.y + s_TileSizePx - 1 };
 
 		if (HasDirection(directions, BorderDirection::Top))
 		{
@@ -288,7 +288,7 @@ private:
 int main()
 {
 	BlockDrop::App app;
-	if (app.Construct(BlockDrop::App::SCREEN_WIDTH_PX, BlockDrop::App::SCREEN_HEIGHT_PX, 1, 1, false, true))
+	if (app.Construct(BlockDrop::App::ScreenWidthPx, BlockDrop::App::s_ScreenHeightPx, 1, 1, false, true))
 	{
 		app.Start();
 	}

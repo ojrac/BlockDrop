@@ -75,7 +75,7 @@ void Sim::Update(float deltaTime, Input const& input)
 void Sim::ScoreClearedRows(int rowCount)
 {
 	m_RowsCleared += rowCount;
-	m_Level = std::min(k_MaxLevel, 1 + (m_RowsCleared / k_RowsPerLevelUp));
+	m_Level = std::min(s_MaxLevel, 1 + (m_RowsCleared / s_RowsPerLevelUp));
 }
 
 
