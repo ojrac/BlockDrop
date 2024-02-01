@@ -113,10 +113,14 @@ private:
 		DrawBorder({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, 3, olc::GREY);
 		FillRect({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, olc::BLACK);
 
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop, "Level:", olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + k_SidebarNumbersLineHeight, std::to_string(10), olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 2 * k_SidebarNumbersLineHeight, "Score:", olc::WHITE, 2);
-		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 3 * k_SidebarNumbersLineHeight, std::to_string(3125), olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop,
+			"Level:", olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + k_SidebarNumbersLineHeight,
+			std::to_string(m_Sim.GetLevel()), olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 2 * k_SidebarNumbersLineHeight,
+			"Score:", olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 3 * k_SidebarNumbersLineHeight,
+			std::to_string(m_Sim.GetScore()), olc::WHITE, 2);
 
 		// Board
 		DrawBorder(m_BoardTopLeft, size, 3, olc::GREY);

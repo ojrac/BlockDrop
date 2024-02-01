@@ -284,6 +284,9 @@ public:
 
 	void Update(float deltaTime, Input const& input);
 
+	int GetLevel() const { return 7; }
+	int GetScore() const { return 3189; }
+
 private:
 	TileColor RandomColor();
 
