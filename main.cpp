@@ -1,7 +1,8 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
-#include <time.h>
 #include <stdint.h>
+#include <string>
+#include <time.h>
 #include "Sim.h"
 
 namespace BlockDrop
@@ -26,9 +27,14 @@ public:
 	static constexpr int k_BoardLeft{ 25 };
 	static constexpr int k_BoardRight{ k_BoardLeft + BOARD_TILE_WIDTH_PX + 25 };
 	static constexpr int k_SidebarWidth{ 110 };
-	static constexpr int k_SidebarHeight{ 100 };
+	static constexpr int k_SidebarPreviewHeight{ 100 };
+	static constexpr int k_SidebarNumbersTop{ k_UiTop + k_SidebarPreviewHeight + 25 };
+	static constexpr int k_SidebarNumbersTextTop{ k_SidebarNumbersTop + 8 };
+	static constexpr int k_SidebarNumbersLineHeight{ 24 };
+	static constexpr int k_SidebarNumbersHeight{ 102 };
 	static constexpr int k_SidebarLeft{ k_BoardRight + 25 };
 	static constexpr int k_SidebarRight{ k_SidebarLeft + k_SidebarWidth };
+	static constexpr int k_SidebarNumbersLeft{ k_SidebarLeft + 10 };
 
 public:
 	App()
@@ -87,22 +93,30 @@ private:
 		vi2d topRight{ m_BoardTopLeft.x + BOARD_TILE_WIDTH_PX, m_BoardTopLeft.y };
 		vi2d bottomRight{ m_BoardTopLeft + size };
 
-		// Sidebar
-		DrawBorder({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, 3, olc::GREY);
-		FillRect({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarHeight }, olc::BLACK);
-		// Preview
+		// Sidebar: Preview
+		DrawBorder({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarPreviewHeight }, 3, olc::GREY);
+		FillRect({ k_SidebarLeft, k_UiTop }, { k_SidebarWidth, k_SidebarPreviewHeight }, olc::BLACK);
+		// Preview Tile
 		auto* tetronimo = TetronimoFactory::GetTetronimoByColor(m_Sim.GetNextBlockColor());
 		if (tetronimo != nullptr)
 		{
 			olc::vi2d origin{
 				k_SidebarLeft + (k_SidebarWidth / 2),
-				k_UiTop + (k_SidebarHeight / 2) - TILE_SIZE_PX,
+				k_UiTop + (k_SidebarPreviewHeight / 2) - TILE_SIZE_PX,
 			};
 			origin += tetronimo->m_CenterOffset * TILE_SIZE_PX;
 
 			DrawTetronimoSquares(origin, tetronimo->m_Color, tetronimo->m_RotatedTileOffsets[0]);
 		}
 
+		// Sidebar: Level and Score
+		DrawBorder({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, 3, olc::GREY);
+		FillRect({ k_SidebarLeft, k_SidebarNumbersTop }, { k_SidebarWidth, k_SidebarNumbersHeight }, olc::BLACK);
+
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop, "Level:", olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + k_SidebarNumbersLineHeight, std::to_string(10), olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 2 * k_SidebarNumbersLineHeight, "Score:", olc::WHITE, 2);
+		DrawString(k_SidebarNumbersLeft, k_SidebarNumbersTextTop + 3 * k_SidebarNumbersLineHeight, std::to_string(3125), olc::WHITE, 2);
 
 		// Board
 		DrawBorder(m_BoardTopLeft, size, 3, olc::GREY);
