@@ -72,6 +72,13 @@ void Sim::Update(float deltaTime, Input const& input)
 	}
 }
 
+void Sim::ScoreClearedRows(int rowCount)
+{
+	m_RowsCleared += rowCount;
+	m_Level = std::min(k_MaxLevel, 1 + (m_RowsCleared / k_RowsPerLevelUp));
+}
+
+
 TileColor Sim::GetNextBlockColor()
 {
 	if (m_NextBlocks.empty())
@@ -198,6 +205,8 @@ void Sim::TransferBlockToTiles(TetronimoInstance const& tetronimo)
 	{
 		return;
 	}
+
+	ScoreClearedRows(clearedRows.size());
 
 	// Move the blocks down
 	int dest = clearedRows.back();

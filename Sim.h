@@ -246,11 +246,16 @@ private:
 class Sim
 {
 public:
+	// Timings
 	static constexpr float s_RotateAirTimeSec = 0.1f;
 	static constexpr float s_InitialInputRepeatDelaySec = 0.167f;
 	static constexpr float s_InputRepeatDelaySec = 0.033f;
 	static constexpr float s_TetronimoSpawnDelay = 0.1f;
 	static constexpr float s_LockDelay = 0.5f;
+
+	// Score and levels
+	static constexpr int k_MaxLevel = 10;
+	static constexpr int k_RowsPerLevelUp = 10;
 
 public:
 	Sim(int width, int height)
@@ -258,7 +263,10 @@ public:
 		, m_Height(height)
 		, m_Tiles(width * height)
 		, m_RandStream(std::random_device()())
-	{}
+	{
+		ResetGame();
+	}
+
 	Sim() = delete;
 	Sim(Sim&) = delete;
 
@@ -284,7 +292,7 @@ public:
 
 	void Update(float deltaTime, Input const& input);
 
-	int GetLevel() const { return 7; }
+	int GetLevel() const { return m_Level; }
 	int GetScore() const { return 3189; }
 
 private:
@@ -308,12 +316,23 @@ private:
 
 	bool HasCollision(TetronimoInstance const& tetronimo) const;
 
-	void GameOver()
+	void ResetGame()
 	{
+		m_Level = 1;
+		m_RowsCleared = 0;
+
+		m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
+
 		m_Tiles.assign(m_Tiles.size(), TileColor::None);
 		m_FallingBlock.reset();
 		m_NextBlocks.clear();
 	}
+	void GameOver()
+	{
+		ResetGame();
+	}
+
+	void ScoreClearedRows(int rowCount);
 
 	bool IsBlockOnGround(TetronimoInstance block);
 	bool TryMoveBlock(TetronimoInstance& block, olc::vi2d const& delta);
@@ -326,6 +345,10 @@ private:
 private:
 	int m_Width{};
 	int m_Height{};
+
+	int m_Level{};
+	int m_RowsCleared{};
+
 	float m_LockDelayTimer{};
 	float m_NextBlockTimer{};
 	float m_DropTimer{};
