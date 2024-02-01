@@ -76,6 +76,8 @@ void Sim::ScoreClearedRows(int rowCount)
 {
 	m_RowsCleared += rowCount;
 	m_Level = std::min(s_MaxLevel, 1 + (m_RowsCleared / s_RowsPerLevelUp));
+	
+	m_Score += m_ScoreByClearCount[std::min(static_cast<int>(m_ScoreByClearCount.size()) - 1, rowCount)];
 }
 
 
@@ -206,7 +208,7 @@ void Sim::TransferBlockToTiles(TetronimoInstance const& tetronimo)
 		return;
 	}
 
-	ScoreClearedRows(clearedRows.size());
+	ScoreClearedRows(static_cast<int>(clearedRows.size()));
 
 	// Move the blocks down
 	int dest = clearedRows.back();

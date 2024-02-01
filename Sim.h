@@ -293,7 +293,7 @@ public:
 	void Update(float deltaTime, Input const& input);
 
 	int GetLevel() const { return m_Level; }
-	int GetScore() const { return 3189; }
+	int GetScore() const { return m_Score; }
 
 private:
 	TileColor RandomColor();
@@ -319,6 +319,7 @@ private:
 	void ResetGame()
 	{
 		m_Level = 1;
+		m_Score = 0;
 		m_RowsCleared = 0;
 
 		m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
@@ -347,6 +348,7 @@ private:
 	int m_Height{};
 
 	int m_Level{};
+	int m_Score{};
 	int m_RowsCleared{};
 
 	float m_LockDelayTimer{};
@@ -358,6 +360,9 @@ private:
 	std::vector<TileColor> m_NextBlocks{};
 
 	std::mt19937 m_RandStream;
+
+	// Constants
+	std::vector<int> m_ScoreByClearCount{ 0, 100, 300, 500, 800 };
 };
 
 }
