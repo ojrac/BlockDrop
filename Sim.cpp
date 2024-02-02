@@ -164,17 +164,62 @@ bool Sim::TryRotateFallingBlock(int direction)
 		return false;
 	}
 
-	TetronimoInstance copy = m_FallingBlock.value();
-	copy.Rotate(direction);
-	if (HasCollision(copy))
+	TetronimoInstance rotated = m_FallingBlock.value();
+	rotated.Rotate(direction);
+
+	if (TryWallKick(rotated))
 	{
-		return false;
-	}
-	else
-	{
-		m_FallingBlock = copy;
+		m_FallingBlock = rotated;
 		return true;
 	}
+
+	return false;
+}
+
+bool Sim::TryWallKick(TetronimoInstance& tetronimo) const
+{
+	if (!HasCollision(tetronimo))
+	{
+		return true;
+	}
+
+	// Wall kick left 1
+	TetronimoInstance copy = tetronimo;
+	copy.Move({ -1, 0 });
+	if (!HasCollision(copy))
+	{
+		tetronimo = copy;
+		return true;
+	}
+
+	// Wall kick right 1
+	copy = tetronimo;
+	copy.Move({ 1, 0 });
+	if (!HasCollision(copy))
+	{
+		tetronimo = copy;
+		return true;
+	}
+
+	// Wall kick left 2
+	copy = tetronimo;
+	copy.Move({ -2, 0 });
+	if (!HasCollision(copy))
+	{
+		tetronimo = copy;
+		return true;
+	}
+
+	// Wall kick right 2
+	copy = tetronimo;
+	copy.Move({ 2, 0 });
+	if (!HasCollision(copy))
+	{
+		tetronimo = copy;
+		return true;
+	}
+
+	return false;
 }
 
 void Sim::TransferBlockToTiles(TetronimoInstance const& tetronimo)

@@ -338,6 +338,7 @@ private:
 	bool TryMoveBlock(TetronimoInstance& block, olc::vi2d const& delta);
 	bool TryMoveFallingBlock(olc::vi2d const& delta);
 	bool TryRotateFallingBlock(int direction);
+	bool TryWallKick(TetronimoInstance& tetronimo) const;
 
 	void TransferBlockToTiles(TetronimoInstance const& tetronimo);
 	bool RowFilled(int col) const;
