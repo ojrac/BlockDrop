@@ -320,6 +320,7 @@ private:
 		m_Level = 1;
 		m_RowsCleared = 0;
 		m_Score = 0;
+		m_Combo = 0;
 
 		m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
 
@@ -350,7 +351,11 @@ private:
 
 	int m_Level{};
 	int m_Score{};
+	// Total for the run, determines level
 	int m_RowsCleared{};
+	// +1 for every drop that clears lines, reset for drops that don't.
+	// Adds extra points on clear starting at level 1.
+	int m_Combo = -1;
 
 	float m_LockDelayTimer{};
 	float m_NextBlockTimer{};

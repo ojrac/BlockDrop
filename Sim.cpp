@@ -83,6 +83,11 @@ void Sim::ScoreClearedRows(int rowCount)
 	m_Level = 1 + (m_RowsCleared / s_RowsPerLevelUp);
 	
 	m_Score += m_ScoreByClearCount[std::min(static_cast<int>(m_ScoreByClearCount.size()) - 1, rowCount)];
+
+	if (m_Combo > 0)
+	{
+		m_Score += 50 * m_Combo * m_Level;
+	}
 }
 
 void Sim::ScoreTileDrop(Input const& input)
@@ -267,9 +272,12 @@ void Sim::TransferBlockToTiles(TetronimoInstance const& tetronimo)
 
 	if (clearedRows.empty())
 	{
+		// No rows cleared
+		m_Combo = -1;
 		return;
 	}
 
+	m_Combo++;
 	ScoreClearedRows(static_cast<int>(clearedRows.size()));
 
 	// Move the blocks down
