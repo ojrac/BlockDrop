@@ -79,7 +79,7 @@ void Sim::Update(float deltaTime, Input const& input)
 void Sim::ScoreClearedRows(int rowCount)
 {
 	m_RowsCleared += rowCount;
-	m_Level = std::min(s_MaxLevel, 1 + (m_RowsCleared / s_RowsPerLevelUp));
+	m_Level = 1 + (m_RowsCleared / s_RowsPerLevelUp);
 	
 	m_Score += m_ScoreByClearCount[std::min(static_cast<int>(m_ScoreByClearCount.size()) - 1, rowCount)];
 }
@@ -261,13 +261,15 @@ float Sim::GetGravity(Input const& input)
 {
 	if (input.bHardDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
 	{
-		return 20.f * 60.f;
+		return 1200.f;
 	}
+
+	float gravity = m_GravityByLevel[std::min(static_cast<int>(m_GravityByLevel.size()), m_Level)];
 	if (input.bSoftDrop && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
 	{
-		return 20.f;
+		return 10 * gravity;
 	}
-	return 0.01667f * 60.f;
+	return gravity;
 }
 
 float Sim::HandleInput(Input const& input)

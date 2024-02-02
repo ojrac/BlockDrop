@@ -254,7 +254,6 @@ public:
 	static constexpr float s_LockDelay = 0.5f;
 
 	// Score and levels
-	static constexpr int s_MaxLevel = 10;
 	static constexpr int s_RowsPerLevelUp = 10;
 
 public:
@@ -319,8 +318,8 @@ private:
 	void ResetGame()
 	{
 		m_Level = 1;
-		m_Score = 0;
 		m_RowsCleared = 0;
+		m_Score = 0;
 
 		m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
 
@@ -363,6 +362,27 @@ private:
 
 	// Constants
 	std::vector<int> m_ScoreByClearCount{ 0, 100, 300, 500, 800 };
+	std::vector<float> m_GravityByLevel{
+		0.01667f * 60.f,
+		0.021017f * 60.f,
+		0.026977f * 60.f,
+		0.035256f * 60.f,
+		0.04693f * 60.f,
+		0.06361f * 60.f,
+		0.0879f * 60.f,
+		0.1236f * 60.f,
+		0.1775f * 60.f,
+		0.2598f * 60.f,
+		0.388f * 60.f,
+		0.59f * 60.f,
+		0.92f * 60.f,
+		1.46f * 60.f,
+		2.36f * 60.f,
+		3.91f * 60.f,
+		6.61f * 60.f,
+		11.43f * 60.f,
+		20.f * 60.f
+	};
 };
 
 }
