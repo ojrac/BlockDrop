@@ -333,6 +333,7 @@ private:
 	}
 
 	void ScoreClearedRows(int rowCount);
+	void ScoreTileDrop(Input const& input);
 
 	bool IsBlockOnGround(TetronimoInstance block);
 	bool TryMoveBlock(TetronimoInstance& block, olc::vi2d const& delta);

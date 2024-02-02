@@ -47,6 +47,7 @@ void Sim::Update(float deltaTime, Input const& input)
 				bFirstDrop = false;
 			}
 			m_DropTimer -= 1.f;
+			ScoreTileDrop(input);
 		}
 
 		if (bDropped && m_FallingBlock.has_value() && IsBlockOnGround(m_FallingBlock.value()))
@@ -82,6 +83,18 @@ void Sim::ScoreClearedRows(int rowCount)
 	m_Level = 1 + (m_RowsCleared / s_RowsPerLevelUp);
 	
 	m_Score += m_ScoreByClearCount[std::min(static_cast<int>(m_ScoreByClearCount.size()) - 1, rowCount)];
+}
+
+void Sim::ScoreTileDrop(Input const& input)
+{
+	if (input.bHardDrop)
+	{
+		m_Score += 2;
+	}
+	else if (input.bSoftDrop)
+	{
+		m_Score += 1;
+	}
 }
 
 
