@@ -131,7 +131,7 @@ public:
 	void Rotate(int direction)
 	{
 		const int size = static_cast<int>(m_Tetronimo->m_RotatedTileOffsets.size());
-		m_RotationIndex = (m_RotationIndex + direction) % size;
+		m_RotationIndex = (m_RotationIndex + size + direction) % size;
 	}
 
 private:
