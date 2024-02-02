@@ -204,6 +204,11 @@ private:
 			{
 				int row = position.y + square.m_Row;
 				int col = position.x + square.m_Column;
+
+				if (row < 0 || row > s_BoardTileHeight || col < 0 || col > s_BoardTileWidth)
+				{
+					continue;
+				}
 				DrawTileOutline(row, col, square.m_Directions, color);
 			}
 		}
@@ -220,6 +225,10 @@ private:
 		for (auto& square : squares)
 		{
 			olc::vi2d pos = origin + olc::vi2d{ square.m_Column * s_TileSizePx, square.m_Row * s_TileSizePx };
+			if (pos.y < m_BoardTopLeft.y)
+			{
+				continue;
+			}
 			DrawTileAtPixel(pos, color);
 		}
 	}
@@ -236,7 +245,6 @@ private:
 	void DrawTileAtPixel(olc::vi2d pos, olc::Pixel color)
 	{
 		DrawDecal(pos, m_TileDecal.get(), { 1, 1 }, color);
-
 	}
 
 	void DrawTileOutline(int row, int col, BorderDirection directions, olc::Pixel color)
