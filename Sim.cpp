@@ -20,7 +20,11 @@ void Sim::Update(float deltaTime, Input const& input)
 
 	m_InputTimer = std::max(m_InputTimer, HandleInput(input));
 
-	if (m_FallingBlock.has_value())
+	if (m_LockDelayTimer > 0.f && m_FallingBlock.has_value() && !IsBlockOnGround(m_FallingBlock.value()))
+	{
+		m_LockDelayTimer = 0.f;
+	}
+	if (m_FallingBlock.has_value() && m_LockDelayTimer <= 0.f)
 	{
 		m_DropTimer += deltaTime * GetGravity(input);
 		bool bDropped = m_DropTimer > 1.f;
@@ -51,7 +55,7 @@ void Sim::Update(float deltaTime, Input const& input)
 			m_LockDelayTimer = s_LockDelay;
 		}
 	}
-	else
+	else if (!m_FallingBlock.has_value())
 	{
 		m_NextBlockTimer -= deltaTime;
 		if (m_NextBlockTimer <= 0.f)
