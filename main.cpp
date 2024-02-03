@@ -35,6 +35,10 @@ public:
 	static constexpr int s_SidebarLeft{ s_BoardRight + 25 };
 	static constexpr int s_SidebarRight{ s_SidebarLeft + s_SidebarWidth };
 	static constexpr int s_SidebarNumbersLeft{ s_SidebarLeft + 10 };
+	static constexpr int s_SidebarInstructionsHelpTop = s_SidebarNumbersTop + s_SidebarNumbersHeight + 25;
+	static constexpr int s_SidebarInstructionsHelpHeight = 268;
+	static constexpr int s_SidebarHelpStrTop = s_SidebarInstructionsHelpTop + 7;
+	static constexpr int s_SidebarHelpLeft = 337;
 
 public:
 	App()
@@ -121,6 +125,35 @@ private:
 			"Score:", olc::WHITE, 2);
 		DrawString(s_SidebarNumbersLeft, s_SidebarNumbersTextTop + 3 * s_SidebarNumbersLineHeight,
 			std::to_string(m_Sim.GetScore()), olc::WHITE, 2);
+
+		// Sidebar: Instructions
+		DrawBorder({ s_SidebarLeft, s_SidebarInstructionsHelpTop }, { s_SidebarWidth, s_SidebarInstructionsHelpHeight }, 3, olc::GREY);
+		FillRect({ s_SidebarLeft, s_SidebarInstructionsHelpTop }, { s_SidebarWidth, s_SidebarInstructionsHelpHeight }, olc::BLACK);
+
+		std::vector<std::string> helpLines{
+			"[Up]",
+			"Rotate",
+			"",
+			"[Down]",
+			"Fast",
+			"",
+			"[Space]",
+			"Drop",
+			"",
+			"[?]",
+			"About",
+		};
+		for (int i = 0; i < helpLines.size(); ++i)
+		{
+			int x = s_SidebarHelpLeft;
+			if (i % 3 == 1)
+			{
+				x += 10;
+			}
+			DrawString(
+				x, s_SidebarHelpStrTop + (i * s_SidebarNumbersLineHeight),
+				helpLines[i], olc::WHITE, 2);
+		}
 
 		// Board
 		DrawBorder(m_BoardTopLeft, size, 3, olc::GREY);
