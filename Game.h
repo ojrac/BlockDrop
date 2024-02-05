@@ -53,6 +53,10 @@ private:
 	olc::vi2d m_BoardTopLeft{ s_BoardLeft, s_UiTop };
 
 	bool m_bAboutOpen{ false };
+	bool m_bExitOpen{ false };
+	bool m_bExiting{ false };
+
+	int m_UiIndex{ 0 };
 
 	Sim m_Sim;
 
@@ -60,6 +64,7 @@ private:
 	void Draw();
 
 	void DrawAbout();
+	void DrawExit();
 
 	void DrawUI();
 

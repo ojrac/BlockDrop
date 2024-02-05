@@ -9,13 +9,26 @@ namespace BlockDrop
 
 bool App::OnUserUpdate(float fElapsedTime)
 {
-	const bool bExit = GetKey(olc::ESCAPE).bPressed;
+	if (GetKey(olc::ESCAPE).bPressed) // Slash/question mark
+	{
+		m_bExitOpen = !m_bExitOpen;
+		if (m_bExitOpen)
+		{
+			m_UiIndex = 1;
+		}
+
+	}
 	if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
 	{
 		m_bAboutOpen = !m_bAboutOpen;
 	}
 
-	if (!m_bAboutOpen && !bExit)
+	if (m_bExitOpen && GetKey(olc::ENTER).bPressed)
+	{
+		m_bExiting = true;
+	}
+
+	if (!m_bAboutOpen && !m_bExiting)
 	{
 		auto input = GetInput();
 		m_Sim.Update(fElapsedTime, input);
@@ -23,7 +36,7 @@ bool App::OnUserUpdate(float fElapsedTime)
 
 	Draw();
 
-	return !bExit;
+	return !m_bExiting;
 }
 
 void App::Draw()
@@ -35,6 +48,10 @@ void App::Draw()
 	if (m_bAboutOpen)
 	{
 		DrawAbout();
+	}
+	else if (m_bExitOpen)
+	{
+		DrawExit();
 	}
 	else
 	{
@@ -53,8 +70,19 @@ void App::DrawAbout()
 	DrawString(s_BoardLeft + 7, s_AboutTop + 150, "olcPixelGameEngine is Copyright\n 2018 - 2024 OneLoneCoder.com", olc::WHITE, 1);
 
 	DrawString(s_BoardLeft + 6, s_AboutTop + 285, "tile.png is MIT License,\ngithub.com/andrew-wilkes/tetron", olc::WHITE, 1);
-	
 }
+
+void App::DrawExit()
+{
+	using namespace olc;
+
+	static constexpr int s_ExitTop{ s_UiTop + 200 };
+	DrawString(s_BoardLeft + 60, s_ExitTop, "Exit?", olc::WHITE, 4);
+
+	DrawString(s_BoardLeft + 45, s_ExitTop + 65, "Press ENTER", olc::WHITE, 2);
+	DrawString(s_BoardLeft + 77, s_ExitTop + 90, "to exit", olc::WHITE, 2);
+}
+
 
 void App::DrawUI()
 {
