@@ -1,6 +1,6 @@
 #include "Game.h"
 
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char*, int nShowCmd)
 {
 	BlockDrop::App app;
 	if (app.Construct(BlockDrop::App::ScreenWidthPx, BlockDrop::App::s_ScreenHeightPx, 1, 1, false, true))
