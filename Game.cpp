@@ -9,17 +9,13 @@ namespace BlockDrop
 
 bool App::OnUserUpdate(float fElapsedTime)
 {
-	if (GetKey(olc::ESCAPE).bPressed)
-	{
-		return false;
-	}
-
+	const bool bExit = GetKey(olc::ESCAPE).bPressed;
 	if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
 	{
 		m_bAboutOpen = !m_bAboutOpen;
 	}
 
-	if (!m_bAboutOpen)
+	if (!m_bAboutOpen && !bExit)
 	{
 		auto input = GetInput();
 		m_Sim.Update(fElapsedTime, input);
@@ -27,7 +23,7 @@ bool App::OnUserUpdate(float fElapsedTime)
 
 	Draw();
 
-	return true;
+	return !bExit;
 }
 
 void App::Draw()
@@ -36,18 +32,28 @@ void App::Draw()
 
 	DrawUI();
 
-	DrawTiles();
-
 	if (m_bAboutOpen)
 	{
 		DrawAbout();
+	}
+	else
+	{
+		DrawTiles();
 	}
 }
 
 void App::DrawAbout()
 {
 	using namespace olc;
-	FillRect(50, 50, 50, 50, olc::RED);
+	
+	static constexpr int s_AboutTop{ s_UiTop + 100 };
+	DrawString(s_BoardLeft + 50, s_AboutTop, "Block Drop", olc::WHITE, 2);
+	DrawString(s_BoardLeft + 60, s_AboutTop + 25, "By Owen Raccuglia", olc::WHITE, 1);
+
+	DrawString(s_BoardLeft + 7, s_AboutTop + 150, "olcPixelGameEngine is Copyright\n 2018 - 2024 OneLoneCoder.com", olc::WHITE, 1);
+
+	DrawString(s_BoardLeft + 6, s_AboutTop + 285, "tile.png is MIT License,\ngithub.com/andrew-wilkes/tetron", olc::WHITE, 1);
+	
 }
 
 void App::DrawUI()
@@ -57,6 +63,21 @@ void App::DrawUI()
 	vi2d size{ s_BoardTileWidthPx, s_BoardTileHeightPx };
 	vi2d topRight{ m_BoardTopLeft.x + s_BoardTileWidthPx, m_BoardTopLeft.y };
 	vi2d bottomRight{ m_BoardTopLeft + size };
+
+	// Sidebar constants
+	static constexpr int s_SidebarWidth{ 110 };
+	static constexpr int s_SidebarPreviewHeight{ 100 };
+	static constexpr int s_SidebarNumbersTop{ s_UiTop + s_SidebarPreviewHeight + 25 };
+	static constexpr int s_SidebarNumbersTextTop{ s_SidebarNumbersTop + 8 };
+	static constexpr int s_SidebarNumbersLineHeight{ 24 };
+	static constexpr int s_SidebarNumbersHeight{ 102 };
+	static constexpr int s_SidebarLeft{ s_BoardRight + 25 };
+	static constexpr int s_SidebarRight{ s_SidebarLeft + s_SidebarWidth };
+	static constexpr int s_SidebarNumbersLeft{ s_SidebarLeft + 10 };
+	static constexpr int s_SidebarInstructionsHelpTop = s_SidebarNumbersTop + s_SidebarNumbersHeight + 25;
+	static constexpr int s_SidebarInstructionsHelpHeight = 268;
+	static constexpr int s_SidebarHelpStrTop = s_SidebarInstructionsHelpTop + 7;
+	static constexpr int s_SidebarHelpLeft = 337;
 
 	// Sidebar: Preview
 	DrawBorder({ s_SidebarLeft, s_UiTop }, { s_SidebarWidth, s_SidebarPreviewHeight }, 3, olc::GREY);
@@ -121,8 +142,9 @@ void App::DrawUI()
 	FillRect(m_BoardTopLeft, size, olc::BLACK);
 }
 
-void App::DrawBorder(olc::vi2d const& topLeft, olc::vi2d const& size, int borderWidth, olc::Pixel color)
+void App::DrawBorder(olc::vi2d const& topLeft, olc::vi2d size, int borderWidth, olc::Pixel color)
 {
+	size -= olc::vi2d{ 1, 1 };
 	for (int i = 1; i <= borderWidth; ++i)
 	{
 		olc::vi2d borderOffset{ i, i };

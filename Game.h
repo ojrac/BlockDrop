@@ -27,19 +27,6 @@ public:
 	static constexpr int s_UiTop{ (s_ScreenHeightPx - s_BoardTileHeightPx) / 2 };
 	static constexpr int s_BoardLeft{ 25 };
 	static constexpr int s_BoardRight{ s_BoardLeft + s_BoardTileWidthPx + 25 };
-	static constexpr int s_SidebarWidth{ 110 };
-	static constexpr int s_SidebarPreviewHeight{ 100 };
-	static constexpr int s_SidebarNumbersTop{ s_UiTop + s_SidebarPreviewHeight + 25 };
-	static constexpr int s_SidebarNumbersTextTop{ s_SidebarNumbersTop + 8 };
-	static constexpr int s_SidebarNumbersLineHeight{ 24 };
-	static constexpr int s_SidebarNumbersHeight{ 102 };
-	static constexpr int s_SidebarLeft{ s_BoardRight + 25 };
-	static constexpr int s_SidebarRight{ s_SidebarLeft + s_SidebarWidth };
-	static constexpr int s_SidebarNumbersLeft{ s_SidebarLeft + 10 };
-	static constexpr int s_SidebarInstructionsHelpTop = s_SidebarNumbersTop + s_SidebarNumbersHeight + 25;
-	static constexpr int s_SidebarInstructionsHelpHeight = 268;
-	static constexpr int s_SidebarHelpStrTop = s_SidebarInstructionsHelpTop + 7;
-	static constexpr int s_SidebarHelpLeft = 337;
 
 public:
 	App()
@@ -76,7 +63,7 @@ private:
 
 	void DrawUI();
 
-	void DrawBorder(olc::vi2d const& topLeft, olc::vi2d const& size, int borderWidth, olc::Pixel color);
+	void DrawBorder(olc::vi2d const& topLeft, olc::vi2d size, int borderWidth, olc::Pixel color);
 
 	static olc::Pixel GetColor(TileColor color);
 
