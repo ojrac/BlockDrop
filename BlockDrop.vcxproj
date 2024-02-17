@@ -134,11 +134,13 @@
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="olcPixelGameEngine.cpp" />
+    <ClCompile Include="ScoreBoard.cpp" />
     <ClCompile Include="Sim.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
+    <ClInclude Include="ScoreBoard.h" />
     <ClInclude Include="Sim.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
   </ItemGroup>

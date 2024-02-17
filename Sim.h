@@ -7,6 +7,7 @@
 #include <random>
 #include <vector>
 #include "olcPixelGameEngine.h"
+#include "ScoreBoard.h"
 
 namespace BlockDrop
 {
@@ -346,6 +347,7 @@ private:
 	bool RowFilled(int col) const;
 
 private:
+	ScoreBoard m_ScoreBoard{};
 	int m_Width{};
 	int m_Height{};
 

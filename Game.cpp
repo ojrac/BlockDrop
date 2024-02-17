@@ -66,6 +66,7 @@ void App::DrawAbout()
 	static constexpr int s_AboutTop{ s_UiTop + 100 };
 	DrawString(s_BoardLeft + 50, s_AboutTop, "Block Drop", olc::WHITE, 2);
 	DrawString(s_BoardLeft + 60, s_AboutTop + 25, "By Owen Raccuglia", olc::WHITE, 1);
+	DrawString(s_BoardLeft + 55, s_AboutTop + 35, "and Paul Raccuglia", olc::WHITE, 1);
 
 	DrawString(s_BoardLeft + 7, s_AboutTop + 150, "olcPixelGameEngine is Copyright\n 2018 - 2024 OneLoneCoder.com", olc::WHITE, 1);
 
