@@ -18,14 +18,16 @@ ScoreBoard::ScoreBoard() {
     while (std::getline(scores, line, '\n')) {
         size_t firstSeparatorPosition = line.find('\t');
         if (firstSeparatorPosition == std::string::npos) {
-            // Error: Missing first score column.
+            // Error: Missing second score column.
+            SortScores();
             return;
         }
         std::string name = line.substr(0, firstSeparatorPosition);
         line.erase(0, firstSeparatorPosition+1);
         size_t secondSeparatorPosition = line.find('\t');
         if (secondSeparatorPosition == std::string::npos) {
-            // Error: Missing secon score column.
+            // Error: Missing third score column.
+            SortScores();
             return;
         }
         int score = stoi(line.substr(0, secondSeparatorPosition));
@@ -41,8 +43,8 @@ void ScoreBoard::SaveScores() {
     if (scoreFile.is_open()) {
         for (int i = 0; i < m_ScoreList->size(); i++) {
             scoreFile << std::get<0>(m_ScoreList->at(i)) << '\t' 
-            << std::to_string(std::get<1>(m_ScoreList->at(i)))  << '\t' 
-            << std::to_string(std::get<2>(m_ScoreList->at(i))) << '\n';
+            << std::get<1>(m_ScoreList->at(i))  << '\t' 
+            << std::get<2>(m_ScoreList->at(i)) << '\n';
         }
         scoreFile.close()
     }
