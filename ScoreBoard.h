@@ -24,7 +24,7 @@ private:
         static constexpr char s_ScoreFile[] = "scores.tsv";
         std::unique_ptr<ScoreList> m_ScoreList{};
 
-        static constexpr char s_DefaultScores[] = "AAA\t100\nBBB\t200\nCCC\t300\nDDD\t400\nEEE\t500\nFFF\t600\nGGG\t700\nHHH\t800\nIII\t900\nJJJ\t1000\n";
+        static constexpr char s_DefaultScores[] = "AAA\t100\t1\nBBB\t200\t2\nCCC\t300\t3\nDDD\t400\t4\nEEE\t500\t5\nFFF\t600\t6\nGGG\t700\t7\nHHH\t800\t8\nIII\t900\t9\nJJJ\t1000\t10";
 
 private:
     void SortScores();
