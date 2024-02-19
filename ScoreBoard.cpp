@@ -59,7 +59,7 @@ void ScoreBoard::SetScore(const std::string& name, const int score, const int le
 
 void ScoreBoard::SortScores() {
     std::sort(m_ScoreList.begin(), m_ScoreList.end(), [](auto const& first, auto const& second) {
-        return std::get<1>(first) < std::get<2>(second);
+        return std::get<1>(first) > std::get<2>(second);
     });
 }
 
