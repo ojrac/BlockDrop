@@ -7,7 +7,6 @@
 #include <random>
 #include <vector>
 #include "olcPixelGameEngine.h"
-#include "ScoreBoard.h"
 
 namespace BlockDrop
 {

@@ -4,6 +4,7 @@
 
 #include "olcPixelGameEngine.h"
 
+#include "ScoreBoard.h"
 #include "Sim.h"
 
 namespace BlockDrop
