@@ -9,6 +9,18 @@
 namespace BlockDrop
 {
 
+enum class UiState
+{
+	Game,
+	GameOver,
+};
+enum class UiOverlayState
+{
+	None,
+	About,
+	Exit,
+};
+
 class App : public olc::PixelGameEngine
 {
 public:
@@ -52,11 +64,9 @@ private:
 
 	olc::vi2d m_BoardTopLeft{ s_BoardLeft, s_UiTop };
 
-	bool m_bAboutOpen{ false };
-	bool m_bExitOpen{ false };
+	UiState m_UiState{ UiState::Game };
+	UiOverlayState m_UiOverlayState{ UiOverlayState::None };
 	bool m_bExiting{ false };
-
-	int m_UiIndex{ 0 };
 
 	Sim m_Sim;
 

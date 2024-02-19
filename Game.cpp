@@ -9,26 +9,47 @@ namespace BlockDrop
 
 bool App::OnUserUpdate(float fElapsedTime)
 {
-	if (GetKey(olc::ESCAPE).bPressed) // Slash/question mark
+	switch (m_UiOverlayState)
 	{
-		m_bExitOpen = !m_bExitOpen;
-		if (m_bExitOpen)
+	case UiOverlayState::Exit:
+	{
+		if (GetKey(olc::ENTER).bPressed)
 		{
-			m_UiIndex = 1;
+			m_bExiting = true;
 		}
-
-	}
-	if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
+		else if (GetKey(olc::ESCAPE).bPressed)
+		{
+			m_UiOverlayState = UiOverlayState::None;
+		}
+	} break;
+	case UiOverlayState::About:
 	{
-		m_bAboutOpen = !m_bAboutOpen;
-	}
-
-	if (m_bExitOpen && GetKey(olc::ENTER).bPressed)
+		if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
+		{
+			m_UiOverlayState = UiOverlayState::None;
+		}
+	} break;
+	case UiOverlayState::None:
 	{
-		m_bExiting = true;
+		switch (m_UiState)
+		{
+		case UiState::Game:
+		{
+			if (GetKey(olc::ESCAPE).bPressed)
+			{
+				m_UiOverlayState = UiOverlayState::Exit;
+			}
+			else if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
+			{
+				m_UiOverlayState = UiOverlayState::About;
+			}
+		}
+		// TODO: Game Over state
+		}
+	} break;
 	}
 
-	if (!m_bAboutOpen && !m_bExiting)
+	if (m_UiOverlayState == UiOverlayState::None && m_UiState == UiState::Game)
 	{
 		auto input = GetInput();
 		m_Sim.Update(fElapsedTime, input);
@@ -45,11 +66,11 @@ void App::Draw()
 
 	DrawUI();
 
-	if (m_bAboutOpen)
+	if (m_UiOverlayState == UiOverlayState::About)
 	{
 		DrawAbout();
 	}
-	else if (m_bExitOpen)
+	else if (m_UiOverlayState == UiOverlayState::Exit)
 	{
 		DrawExit();
 	}
