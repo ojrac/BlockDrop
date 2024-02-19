@@ -43,8 +43,48 @@ bool App::OnUserUpdate(float fElapsedTime)
 			{
 				m_UiOverlayState = UiOverlayState::About;
 			}
-		}
-		// TODO: Game Over state
+		} break;
+		case UiState::GameOver:
+		{
+			if (GetKey(olc::ENTER).bPressed)
+			{
+				if (m_Sim.GetScore() > m_ScoreBoard.GetLowestScore())
+				{
+					m_UiState = UiState::LeaderboardEntry;
+					m_UiIndex = 0;
+					m_PendingName = "AAA";
+				}
+				else
+				{
+					m_UiState = UiState::Game;
+					m_Sim.ResetGame();
+				}
+			}
+		} break;
+		case UiState::LeaderboardEntry:
+		{
+			m_UiIndex = (m_UiIndex + 3
+				- static_cast<int>(GetKey(olc::LEFT).bPressed)
+				+ static_cast<int>(GetKey(olc::RIGHT).bPressed)
+				) % 3;
+			if (GetKey(olc::UP).bPressed)
+			{
+				char ch = (m_PendingName[m_UiIndex] - 'A' + 25) % 26;
+				m_PendingName[m_UiIndex] = 'A' + ch;
+			} else if (GetKey(olc::DOWN).bPressed)
+			{
+				char ch = (m_PendingName[m_UiIndex] - 'A' + 1) % 26;
+				m_PendingName[m_UiIndex] = 'A' + ch;
+			}
+
+			if (GetKey(olc::ENTER).bPressed)
+			{
+				m_ScoreBoard.SetScore(
+					m_PendingName,
+					m_Sim.GetScore(),
+					m_Sim.GetLevel());
+			}
+		} break;
 		}
 	} break;
 	}
@@ -53,6 +93,10 @@ bool App::OnUserUpdate(float fElapsedTime)
 	{
 		auto input = GetInput();
 		m_Sim.Update(fElapsedTime, input);
+		if (m_Sim.IsGameOver())
+		{
+			m_UiState = UiState::GameOver;
+		}
 	}
 
 	Draw();

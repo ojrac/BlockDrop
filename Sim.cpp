@@ -15,6 +15,11 @@ bool HasDirection(BorderDirection value, BorderDirection other)
 
 void Sim::Update(float deltaTime, Input const& input)
 {
+	if (m_GameOver)
+	{
+		return;
+	}
+
 	m_InputTimer -= deltaTime;
 	m_LockDelayTimer -= deltaTime;
 
@@ -75,6 +80,21 @@ void Sim::Update(float deltaTime, Input const& input)
 			}
 		}
 	}
+}
+
+void Sim::ResetGame()
+{
+	m_Level = 1;
+	m_RowsCleared = 0;
+	m_Score = 0;
+	m_Combo = 0;
+
+	m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
+
+	m_Tiles.assign(m_Tiles.size(), TileColor::None);
+	m_FallingBlock.reset();
+	m_NextBlocks.clear();
+	m_GameOver = false;
 }
 
 void Sim::ScoreClearedRows(int rowCount)

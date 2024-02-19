@@ -13,6 +13,7 @@ enum class UiState
 {
 	Game,
 	GameOver,
+	LeaderboardEntry,
 };
 enum class UiOverlayState
 {
@@ -67,8 +68,11 @@ private:
 	UiState m_UiState{ UiState::Game };
 	UiOverlayState m_UiOverlayState{ UiOverlayState::None };
 	bool m_bExiting{ false };
+	int m_UiIndex{ 0 };
+	std::string m_PendingName{};
 
 	Sim m_Sim;
+	ScoreBoard m_ScoreBoard{};
 
 private:
 	void Draw();

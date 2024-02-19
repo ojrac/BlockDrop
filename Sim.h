@@ -291,9 +291,11 @@ public:
 	olc::vi2d GetDropPosition() const;
 
 	void Update(float deltaTime, Input const& input);
+	void ResetGame();
 
 	int GetLevel() const { return m_Level; }
 	int GetScore() const { return m_Score; }
+	bool IsGameOver() const { return m_GameOver; }
 
 private:
 	TileColor RandomColor();
@@ -316,22 +318,9 @@ private:
 
 	bool HasCollision(TetronimoInstance const& tetronimo) const;
 
-	void ResetGame()
-	{
-		m_Level = 1;
-		m_RowsCleared = 0;
-		m_Score = 0;
-		m_Combo = 0;
-
-		m_LockDelayTimer = m_NextBlockTimer = m_DropTimer = m_InputTimer = 0;
-
-		m_Tiles.assign(m_Tiles.size(), TileColor::None);
-		m_FallingBlock.reset();
-		m_NextBlocks.clear();
-	}
 	void GameOver()
 	{
-		ResetGame();
+		m_GameOver = true;
 	}
 
 	void ScoreClearedRows(int rowCount);
@@ -347,10 +336,10 @@ private:
 	bool RowFilled(int col) const;
 
 private:
-	ScoreBoard m_ScoreBoard{};
 	int m_Width{};
 	int m_Height{};
 
+	bool m_GameOver{ false };
 	int m_Level{};
 	int m_Score{};
 	// Total for the run, determines level
