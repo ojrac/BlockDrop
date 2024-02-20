@@ -121,7 +121,17 @@ void App::Draw()
 	else
 	{
 		DrawTiles();
+		if (m_UiState == UiState::GameOver)
+		{
+			DrawGameOver();
+		}
 	}
+}
+
+void App::DrawGameOver()
+{
+	olc::vi2d pos{ s_BoardLeft + 20, s_UiTop + (s_BoardTileHeightPx / 2) - 40};
+	DrawStringDecal(pos, "GAME OVER\n  Press\n [Enter]", olc::WHITE, { 3, 3 });
 }
 
 void App::DrawAbout()

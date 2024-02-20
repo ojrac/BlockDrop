@@ -80,6 +80,7 @@ private:
 
 	void DrawAbout();
 	void DrawExit();
+	void DrawGameOver();
 
 	void DrawUI();
 
