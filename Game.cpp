@@ -33,17 +33,6 @@ bool App::OnUserUpdate(float fElapsedTime)
 	{
 		switch (m_UiState)
 		{
-		case UiState::Game:
-		{
-			if (GetKey(olc::ESCAPE).bPressed)
-			{
-				m_UiOverlayState = UiOverlayState::Exit;
-			}
-			else if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
-			{
-				m_UiOverlayState = UiOverlayState::About;
-			}
-		} break;
 		case UiState::GameOver:
 		{
 			if (GetKey(olc::ENTER).bPressed)
@@ -59,6 +48,18 @@ bool App::OnUserUpdate(float fElapsedTime)
 					m_UiState = UiState::Game;
 					m_Sim.ResetGame();
 				}
+			}
+		}
+		// Intentional fall through
+		case UiState::Game:
+		{
+			if (GetKey(olc::ESCAPE).bPressed)
+			{
+				m_UiOverlayState = UiOverlayState::Exit;
+			}
+			else if (GetKey(olc::OEM_2).bPressed) // Slash/question mark
+			{
+				m_UiOverlayState = UiOverlayState::About;
 			}
 		} break;
 		case UiState::LeaderboardEntry:
