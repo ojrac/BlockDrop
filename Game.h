@@ -14,7 +14,7 @@ enum class UiState
 {
 	Game,
 	GameOver,
-	LeaderboardEntry,
+	ScoreboardEntry,
 };
 enum class UiOverlayState
 {
@@ -81,6 +81,7 @@ private:
 	void DrawAbout();
 	void DrawExit();
 	void DrawGameOver();
+	void DrawScoreboard();
 
 	void DrawUI();
 

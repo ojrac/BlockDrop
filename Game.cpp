@@ -39,7 +39,7 @@ bool App::OnUserUpdate(float fElapsedTime)
 			{
 				if (m_Sim.GetScore() > m_ScoreBoard.GetLowestScore())
 				{
-					m_UiState = UiState::LeaderboardEntry;
+					m_UiState = UiState::ScoreboardEntry;
 					m_UiIndex = 0;
 					m_PendingName = "AAA";
 				}
@@ -49,7 +49,7 @@ bool App::OnUserUpdate(float fElapsedTime)
 					m_Sim.ResetGame();
 				}
 			}
-		}
+		} [[fallthrough]];
 		// Intentional fall through
 		case UiState::Game:
 		{
@@ -62,8 +62,13 @@ bool App::OnUserUpdate(float fElapsedTime)
 				m_UiOverlayState = UiOverlayState::About;
 			}
 		} break;
-		case UiState::LeaderboardEntry:
+		case UiState::ScoreboardEntry:
 		{
+			if (GetKey(olc::ESCAPE).bPressed)
+			{
+				m_UiOverlayState = UiOverlayState::Exit;
+			}
+
 			m_UiIndex = (m_UiIndex + 3
 				- static_cast<int>(GetKey(olc::LEFT).bPressed)
 				+ static_cast<int>(GetKey(olc::RIGHT).bPressed)
@@ -119,6 +124,10 @@ void App::Draw()
 	{
 		DrawExit();
 	}
+	else if (m_UiState == UiState::ScoreboardEntry)
+	{
+		DrawScoreboard();
+	}
 	else
 	{
 		DrawTiles();
@@ -126,6 +135,32 @@ void App::Draw()
 		{
 			DrawGameOver();
 		}
+	}
+}
+
+void App::DrawScoreboard()
+{
+	DrawString(s_BoardLeft + 60, s_UiTop + 15, "SCORES", olc::WHITE, 3);
+
+	static constexpr int s_ScoresTop = s_UiTop + 75;
+	static constexpr int s_NameLeft = s_BoardLeft + 45;
+	static constexpr int s_ScoreLeft = s_BoardLeft + 110;
+	static constexpr int s_ScoreLineHeight = 24;
+	static constexpr int s_ScoreCharWidth = 16;
+	static constexpr int s_ScoreNumberDigits = 7;
+
+	auto const& scores = m_ScoreBoard.GetScoreList();
+	for (int i = 0; i < scores.size(); ++i)
+	{
+		auto const& score = scores[i];
+		int rowTop = s_ScoresTop + (i * s_ScoreLineHeight);
+		DrawString(
+			{ s_NameLeft, rowTop }, std::get<0>(score), olc::WHITE, 2);
+		std::string points = std::to_string(std::get<1>(score));
+		int scoreLeft = s_ScoreLeft + (s_ScoreCharWidth * (
+			s_ScoreNumberDigits - static_cast<int>(points.size())));
+		DrawString(
+			{ scoreLeft, rowTop }, points, olc::WHITE, 2);
 	}
 }
 
