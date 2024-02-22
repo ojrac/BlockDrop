@@ -71,9 +71,11 @@ private:
 	bool m_bExiting{ false };
 	int m_UiIndex{ 0 };
 	std::string m_PendingName{};
+	ScoreBoard m_PendingScoreboard{};
+	int m_PendingScoreIndex{};
 
 	Sim m_Sim;
-	ScoreBoard m_ScoreBoard{};
+	FileBackedScoreBoard m_ScoreBoard{};
 
 private:
 	void Draw();

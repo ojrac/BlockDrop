@@ -42,6 +42,14 @@ bool App::OnUserUpdate(float fElapsedTime)
 					m_UiState = UiState::ScoreboardEntry;
 					m_UiIndex = 0;
 					m_PendingName = "AAA";
+					m_PendingScoreboard = ScoreBoard(m_ScoreBoard.GetScoreList());
+					m_PendingScoreboard.SetScore("???", m_Sim.GetScore(), m_Sim.GetLevel());
+					auto const& scoreList = m_PendingScoreboard.GetScoreList();
+					m_PendingScoreIndex = std::distance(scoreList.begin(),
+						std::find_if(scoreList.begin(), scoreList.end(), [](auto const& e) {
+							return std::get<0>(e) == "???";
+						}));
+					m_PendingScoreboard.Rename(m_PendingScoreIndex, "AAA");
 				}
 				else
 				{
@@ -82,6 +90,8 @@ bool App::OnUserUpdate(float fElapsedTime)
 				char ch = (m_PendingName[m_UiIndex] - 'A' + 1) % 26;
 				m_PendingName[m_UiIndex] = 'A' + ch;
 			}
+
+			m_PendingScoreboard.Rename(m_PendingScoreIndex, m_PendingName);
 
 			if (GetKey(olc::ENTER).bPressed)
 			{
@@ -149,18 +159,23 @@ void App::DrawScoreboard()
 	static constexpr int s_ScoreCharWidth = 16;
 	static constexpr int s_ScoreNumberDigits = 7;
 
-	auto const& scores = m_ScoreBoard.GetScoreList();
-	for (int i = 0; i < scores.size(); ++i)
+	auto const& scores = m_PendingScoreboard.GetScoreList();
+	int i = 0;
+	for (auto [iter, i] = std::tuple{ scores.begin(), 0 };
+		iter != scores.end();
+		++iter, ++i)
 	{
-		auto const& score = scores[i];
+		bool isCurrent = i == m_PendingScoreIndex;
+		olc::Pixel color = (isCurrent) ? olc::YELLOW : olc::WHITE;
+
 		int rowTop = s_ScoresTop + (i * s_ScoreLineHeight);
 		DrawString(
-			{ s_NameLeft, rowTop }, std::get<0>(score), olc::WHITE, 2);
-		std::string points = std::to_string(std::get<1>(score));
+			{ s_NameLeft, rowTop }, std::get<0>(*iter), color, 2);
+		std::string points = std::to_string(std::get<1>(*iter));
 		int scoreLeft = s_ScoreLeft + (s_ScoreCharWidth * (
 			s_ScoreNumberDigits - static_cast<int>(points.size())));
 		DrawString(
-			{ scoreLeft, rowTop }, points, olc::WHITE, 2);
+			{ scoreLeft, rowTop }, points, color, 2);
 	}
 }
 
