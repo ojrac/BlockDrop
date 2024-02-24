@@ -41,15 +41,14 @@ bool App::OnUserUpdate(float fElapsedTime)
 				{
 					m_UiState = UiState::ScoreboardEntry;
 					m_UiIndex = 0;
-					m_PendingName = "AAA";
 					m_PendingScoreboard = ScoreBoard(m_ScoreBoard.GetScoreList());
 					m_PendingScoreboard.SetScore("???", m_Sim.GetScore(), m_Sim.GetLevel());
 					auto const& scoreList = m_PendingScoreboard.GetScoreList();
-					m_PendingScoreIndex = std::distance(scoreList.begin(),
+					m_PendingScoreIndex = static_cast<int>(std::distance(scoreList.begin(),
 						std::find_if(scoreList.begin(), scoreList.end(), [](auto const& e) {
 							return std::get<0>(e) == "???";
-						}));
-					m_PendingScoreboard.Rename(m_PendingScoreIndex, "AAA");
+						})));
+					m_PendingScoreboard.Rename(m_PendingScoreIndex, m_PendingName);
 				}
 				else
 				{
@@ -81,17 +80,32 @@ bool App::OnUserUpdate(float fElapsedTime)
 				- static_cast<int>(GetKey(olc::LEFT).bPressed)
 				+ static_cast<int>(GetKey(olc::RIGHT).bPressed)
 				) % 3;
-			if (GetKey(olc::UP).bPressed)
-			{
-				char ch = (m_PendingName[m_UiIndex] - 'A' + 25) % 26;
-				m_PendingName[m_UiIndex] = 'A' + ch;
-			} else if (GetKey(olc::DOWN).bPressed)
-			{
-				char ch = (m_PendingName[m_UiIndex] - 'A' + 1) % 26;
-				m_PendingName[m_UiIndex] = 'A' + ch;
-			}
 
-			m_PendingScoreboard.Rename(m_PendingScoreIndex, m_PendingName);
+			auto upKey = GetKey(olc::UP);
+			auto downKey = GetKey(olc::DOWN);
+			if (upKey.bPressed)
+			{
+				RotateScoreboardCharacter(-1);
+				m_UiRepeatDelay = 0.25f;
+			}
+			else if (downKey.bPressed)
+			{
+				RotateScoreboardCharacter(1);
+				m_UiRepeatDelay = 0.25f;
+			}
+			else if (upKey.bHeld || downKey.bHeld)
+			{
+				m_UiRepeatDelay -= fElapsedTime;
+				if (m_UiRepeatDelay < 0)
+				{
+					m_UiRepeatDelay = 0.05f;
+					RotateScoreboardCharacter(upKey.bHeld ? -1 : 1);
+				}
+			}
+			else
+			{
+				m_UiRepeatDelay = -1.0f;
+			}
 
 			if (GetKey(olc::ENTER).bPressed)
 			{
@@ -99,6 +113,8 @@ bool App::OnUserUpdate(float fElapsedTime)
 					m_PendingName,
 					m_Sim.GetScore(),
 					m_Sim.GetLevel());
+				m_UiState = UiState::Game;
+				m_Sim.ResetGame();
 			}
 		} break;
 		}
@@ -118,6 +134,16 @@ bool App::OnUserUpdate(float fElapsedTime)
 	Draw();
 
 	return !m_bExiting;
+}
+void App::RotateScoreboardCharacter(int direction)
+{
+	if (m_UiIndex < 0 || m_UiIndex >= m_PendingName.size())
+	{
+		return;
+	}
+	char ch = (m_PendingName[m_UiIndex] - 'A' + direction + 26) % 26;
+	m_PendingName[m_UiIndex] = 'A' + ch;
+	m_PendingScoreboard.Rename(m_PendingScoreIndex, m_PendingName);
 }
 
 void App::Draw()
@@ -169,13 +195,20 @@ void App::DrawScoreboard()
 		olc::Pixel color = (isCurrent) ? olc::YELLOW : olc::WHITE;
 
 		int rowTop = s_ScoresTop + (i * s_ScoreLineHeight);
-		DrawString(
+		DrawString(	
 			{ s_NameLeft, rowTop }, std::get<0>(*iter), color, 2);
 		std::string points = std::to_string(std::get<1>(*iter));
 		int scoreLeft = s_ScoreLeft + (s_ScoreCharWidth * (
 			s_ScoreNumberDigits - static_cast<int>(points.size())));
 		DrawString(
 			{ scoreLeft, rowTop }, points, color, 2);
+
+		if (isCurrent)
+		{
+			int left = s_NameLeft - 2 + (16 * m_UiIndex);
+			int top = rowTop - 3;
+			DrawRect(left, top, 17, 19, olc::YELLOW);
+		}
 	}
 }
 

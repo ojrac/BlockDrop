@@ -78,7 +78,7 @@ void ScoreBoard::SetScore(const std::string& name, const int score, const int le
 
 void ScoreBoard::Rename(const int index, const std::string& newName)
 {
-    if (index <= m_ScoreList.size())
+    if (index >= m_ScoreList.size())
     {
         return;
     }

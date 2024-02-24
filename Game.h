@@ -70,7 +70,8 @@ private:
 	UiOverlayState m_UiOverlayState{ UiOverlayState::None };
 	bool m_bExiting{ false };
 	int m_UiIndex{ 0 };
-	std::string m_PendingName{};
+	float m_UiRepeatDelay{ -1.0f };
+	std::string m_PendingName{ "AAA" };
 	ScoreBoard m_PendingScoreboard{};
 	int m_PendingScoreIndex{};
 
@@ -88,6 +89,8 @@ private:
 	void DrawUI();
 
 	void DrawBorder(olc::vi2d const& topLeft, olc::vi2d size, int borderWidth, olc::Pixel color);
+
+	void RotateScoreboardCharacter(int direction);
 
 	static olc::Pixel GetColor(TileColor color);
 
